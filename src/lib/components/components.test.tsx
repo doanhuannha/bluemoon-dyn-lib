@@ -1,0 +1,349 @@
+import React, { RefObject } from 'react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import '../Utilities.tsx';
+import { BaseComponent } from '../BaseComponent';
+import { DynConfig } from '../DynConfig';
+import Button from './Button';
+import DropdownList from './DropdownList';
+import Hidden from './Hidden';
+import Label from './Label';
+import TextBox from './TextBox';
+import ViewLoader from './ViewLoader';
+import Table, { TableConfig } from './Table';
+import CheckBox from './CheckBox';
+import CheckBoxList from './CheckBoxList';
+import RadioList from './RadioList';
+import TextArea from './TextArea';
+
+
+describe('test components', () => {
+    class MyCompViewLoader extends BaseComponent {
+        protected renderComponent(): React.ReactNode {
+            return (<span>{this.props.label}</span>);
+        }
+
+
+    }
+    const MyCompTable = function(p: any){
+        return <button value={p.data.f1}>{p.data.f2}</button>;
+    }
+    DynConfig.exportControls({
+        'mycompviewloader': MyCompViewLoader,
+        'mycomptable': MyCompTable
+    });
+    window.utilities.importFieldDefs({
+        fieldAA: {
+            type: 'mycompviewloader',
+            label: 'Field 1',
+            dataField: 'f1'
+        },
+        fieldBB: {
+            type: 'mycompviewloader',
+            label: 'Field 2',
+            dataField: 'f2'
+        }
+    });
+
+    window.utilities.importViewDefs({
+        viewAA: {
+            fields: [{
+                name: 'fieldAA'
+            }]
+        },
+        viewBB: {
+            fields: [{
+                name: 'fieldBB'
+            }]
+        }
+    });
+    test('test button', () => {
+        let objRef = null as Button;
+        const onDidMount = function (s: any) {
+            objRef = s;
+        }
+        let r = render(<Button id="cidButton" didMountFunction={onDidMount} />);
+        
+        let el = document.getElementById('cidButton');
+        expect(el.tagName).toEqual('BUTTON');
+        expect(objRef.shouldBindData()).toEqual(false);
+        fireEvent.click(el);
+        expect(objRef.state.value).toEqual(true);
+
+        objRef.setReadonly(true);
+        expect(document.getElementById('cidButton')).toEqual(null);
+
+        cleanup();
+        r = render(<Button id="cidButton" options={{htmlProps: {className:'mybutton'}}} />);
+        el = document.getElementById('cidButton');
+        expect(el.tagName).toEqual('BUTTON');
+        expect(el.className).toEqual('mybutton');
+
+    });
+    test('test dropdownlist', () => {
+        let objRef = null as DropdownList;
+        const onDidMount = function (s: any) {
+            objRef = s;
+        }
+        const ds = [
+            { value: 'a1', text: 'Item 1' },
+            { value: 'a2', text: 'Item 2' },
+            { value: 'a3', text: 'Item 3' }
+        ];
+        let r = render(<DropdownList id="cidDropdown" didMountFunction={onDidMount} label="drop_label" />);
+        let el = document.getElementById('cidDropdown');
+        expect(el.childElementCount).toEqual(0);
+        expect(screen.getAllByText('drop_label')[0]).toBeInstanceOf(HTMLLabelElement);
+        
+        cleanup();
+        r = render(<DropdownList id="cidDropdown" didMountFunction={onDidMount} dataSource={ds} />);
+        el = document.getElementById('cidDropdown');
+        expect(el.tagName).toEqual('SELECT');
+        (el as HTMLSelectElement).selectedIndex = 2;
+        fireEvent.change(el);
+        expect(objRef.state.value).toEqual('a3');
+        expect(r.container.getElementsByTagName('label').length).toEqual(0);
+    });
+    test('test hidden', () => {
+        let r = render(<Hidden id="cidHidden" />);
+        let el = document.getElementById('cidHidden');
+        expect(el.tagName).toEqual('INPUT');
+    });
+    test('test label', () => {
+        let objRef = React.createRef<Label>();
+        const onDidMount = function (s: any) {
+            //objRef = s;
+        } 
+        let r = render(<Label ref={objRef} id="cidLabel" didMountFunction={onDidMount}/>);
+        let el = document.getElementById('cidLabel');
+        expect(el.tagName).toEqual('SPAN');
+        objRef.current.setValue('labelVal');
+        expect(el.getElementsByTagName('label').length).toEqual(0);
+
+        cleanup();
+        r = render(<Label ref={objRef} id="cidLabel" label="Label 1" didMountFunction={onDidMount}/>);
+        el = document.getElementById('cidLabel');
+        expect(el.tagName).toEqual('SPAN');
+        expect(el.getElementsByTagName('label')[0].innerHTML).toEqual('Label 1');
+
+        objRef.current.setValue('labelVal');
+        expect(el.getElementsByTagName('span')[0].innerHTML).toEqual('labelVal');
+
+        cleanup();
+        r = render(<Label id="cidLabel" label="Label 1" options={{alwaysShow :false}} />);
+        el = document.getElementById('cidLabel');
+        expect(el).toEqual(null);
+
+    });
+    test('test textbox', () => {
+        let objRef = null as TextBox;
+        const onDidMount = function (s: any) {
+            objRef = s;
+        } 
+        let r = render(<TextBox id="cidTextbox" didMountFunction={onDidMount} label="textbox_label"/>);
+        let el = document.getElementById('cidTextbox') as HTMLInputElement;
+        expect(el.tagName).toEqual('INPUT');
+        //objRef.setValue('labelVal');
+        fireEvent.change(el,{target:{value:'labelVal'}});
+        expect(el.value).toEqual('labelVal');
+        expect(screen.getAllByText('textbox_label')[0]).toBeInstanceOf(HTMLLabelElement);
+        cleanup();
+        r = render(<TextBox id="cidTextbox" didMountFunction={onDidMount}/>);
+        expect(r.container.getElementsByTagName('label').length).toEqual(0);
+
+        objRef.setReadonly(true);
+        expect(document.getElementById('cidTextbox')).toEqual(null);
+    });
+    
+    test('test ViewLoader', () => {
+        
+        let objRef = null as ViewLoader;
+        const onDidMount = function (s: any) {
+            objRef = s;
+        } 
+        let r = render(<ViewLoader id="cidViewContainer" didMountFunction={onDidMount}/>);
+        let el = null;
+        expect(r.container.innerHTML).toEqual('');
+        
+        objRef.setValue('viewAA');
+        
+        el = screen.getByText('Field 1');
+        expect(el).toBeInstanceOf(HTMLSpanElement);
+
+        objRef.setValue({name: 'viewBB', dataApiParams: null});
+        el = screen.getByText('Field 2');
+        expect(el).toBeInstanceOf(HTMLSpanElement);
+
+        objRef.setValue({name1: 'viewBB', dataApiParams: null});
+        expect(r.container.innerHTML).toEqual('');
+    });
+    
+    test('test table', () => {
+        
+        let tbConfig = null as TableConfig;
+        tbConfig = {
+            headers:[
+                {label: 'Col 1', dataField: 'fd1'},
+                {label: 'Col 2', dataField: 'fd2'}
+            ]
+        };
+        let objRef = null as Table;
+        const onDidMount = function (s: any) {
+            objRef = s;
+        } 
+        let r = render(<Table id="cidTable" didMountFunction={onDidMount} options={tbConfig}/> );
+        expect(r.container.innerHTML).toEqual('');
+
+        objRef.setValue([{fd1:'val 1.1', fd2:'val 1.2'},{fd1:'val 2.1', fd2:'val 2.2'}]);
+        let el = document.getElementById('cidTable');
+        expect(el).toBeInstanceOf(HTMLTableElement);
+
+        expect(el.getElementsByTagName('tr').length).toEqual(3);
+        let td = el.getElementsByTagName('td');
+        expect(td.length).toEqual(4);
+        expect(td[0].innerHTML).toEqual('val 1.1');
+
+        cleanup();
+        tbConfig = {
+            headers:[
+                {label: 'Col 1', dataField: 'fd1'},
+                {label: 'Col 2', dataField: 'fd2'},
+                {
+                    label: 'Col 3', dataField: null,
+                    buildTableItem: function(data:any){
+                        return '<a href="view/' + data.fd1 + '">Edit</a>';
+                    }
+                }
+            ],
+            htmlProps:{
+                className: 'darktable'
+            }
+        };
+        
+        r = render(<Table id="cidTable" didMountFunction={onDidMount} options={tbConfig}/> );
+        expect(r.container.innerHTML).toEqual('');
+
+        objRef.setValue([{fd1:'val 1.1', fd2:'val 1.2'},{fd1:'val 2.1', fd2:'val 2.2'}]);
+        el = document.getElementById('cidTable');
+        expect(el).toBeInstanceOf(HTMLTableElement);
+        expect(el.className).toEqual('darktable');
+
+        cleanup();
+        tbConfig = {
+            headers:[
+                {label: 'Col 1', dataField: 'fd1'},
+                {label: 'Col 2', dataField: 'fd2'},
+                {
+                    label: 'Col 3', dataField: null,
+                    buildTableItem: function(data:any){
+                        return <a href={"view/"+data.fd1}>Edit</a>;
+                    }
+                }
+            ]
+        };
+        
+        r = render(<Table id="cidTable" didMountFunction={onDidMount} options={tbConfig}/> );
+        expect(r.container.innerHTML).toEqual('');
+
+        objRef.setValue([{fd1:'val 1.1', fd2:'val 1.2'},{fd1:'val 2.1', fd2:'val 2.2'}]);
+        el = document.getElementById('cidTable');
+        expect(el).toBeInstanceOf(HTMLTableElement);
+
+        cleanup();
+        tbConfig = {
+            headers:[
+                {label: 'Col 1', dataField: 'fd1'},
+                {label: 'Col 2', dataField: 'fd2'},
+                {
+                    label: 'Col 3', dataField: null,
+                    component: 'mycomptable'
+                }
+            ]
+        };
+        
+        r = render(<Table id="cidTable" didMountFunction={onDidMount} options={tbConfig}/> );
+        expect(r.container.innerHTML).toEqual('');
+
+        objRef.setValue([{fd1:'val 1.1', fd2:'val 1.2'},{fd1:'val 2.1', fd2:'val 2.2'}]);
+        el = document.getElementById('cidTable');
+        expect(el).toBeInstanceOf(HTMLTableElement);
+
+
+    });
+    
+    test('test checkbox',()=>{
+        let refObj = React.createRef() as RefObject<CheckBox>;
+        let r = render(<CheckBox ref={refObj} label="Active" id="cidCheckbox" />);
+        let el = document.getElementById('cidCheckbox');
+        expect(el).toBeInstanceOf(HTMLInputElement);
+        el.click();
+        expect(refObj.current.getValue()).toEqual(true);
+    });
+    test('test checkboxlist',()=>{
+        let refObj = React.createRef() as RefObject<CheckBoxList>;
+        let r = render(<CheckBoxList ref={refObj} id="cidCheckboxList" dataSource={[{text:'t001', value:'v001'}, {text:'t002', value:'v002'}]} />);
+        
+        let el = document.getElementById('cidCheckboxList');
+        expect(el).toBeInstanceOf(HTMLSpanElement);
+        el = document.getElementById('cidCheckboxList_item1');
+        el.click();
+        expect((el as HTMLInputElement).checked).toEqual(true);
+        expect(refObj.current.getValue()).toEqual(['v002']);
+        el = document.getElementById('cidCheckboxList_item0');
+        el.click();
+        expect((el as HTMLInputElement).checked).toEqual(true);
+        expect(refObj.current.getValue()).toEqual(['v002', 'v001']);
+        el.click();
+        expect(refObj.current.getValue()).toEqual(['v002']);
+
+        r = render(<CheckBoxList ref={refObj} id="cidCheckboxList2" label="Checkbox list" />);
+        el = document.getElementById('cidCheckboxList2');
+        expect(el).toBeInstanceOf(HTMLSpanElement);
+        expect(el.firstElementChild.innerHTML).toEqual('Checkbox list');
+        //el.click();
+        //expect(refObj.current.getValue()).toEqual(true);
+    });
+    test('test radio list',()=>{
+        let refObj = React.createRef() as RefObject<RadioList>;
+        let r = render(<RadioList ref={refObj} id="cidRadioList" dataSource={[{text:'t001', value:'v001'}, {text:'t002', value:'v002'}]} />);
+        let el = document.getElementById('cidRadioList');
+        expect(el).toBeInstanceOf(HTMLSpanElement);
+        el = document.getElementById('cidRadioList_item1');
+        el.click();
+        expect((el as HTMLInputElement).checked).toEqual(true);
+        expect(refObj.current.getValue()).toEqual('v002');
+        el = document.getElementById('cidRadioList_item0');
+        el.click();
+        expect((el as HTMLInputElement).checked).toEqual(true);
+        expect(refObj.current.getValue()).toEqual('v001');
+        el.click();
+        expect(refObj.current.getValue()).toEqual('v001');
+
+        r = render(<RadioList ref={refObj} id="cidRadioList2" label="Radio list" />);
+        el = document.getElementById('cidRadioList2');
+        expect(el).toBeInstanceOf(HTMLSpanElement);
+        expect(el.firstElementChild.innerHTML).toEqual('Radio list');
+        //el.click();
+        //expect(refObj.current.getValue()).toEqual(true);
+    });
+
+    test('test textarea', () => {
+        let objRef = null as TextArea;
+        const onDidMount = function (s: any) {
+            objRef = s;
+        } 
+        let r = render(<TextArea id="cidTextArea" didMountFunction={onDidMount} label="textarea_label"/>);
+        let el = document.getElementById('cidTextArea') as HTMLInputElement;
+        expect(el.tagName).toEqual('TEXTAREA');
+        //objRef.setValue('labelVal');
+        fireEvent.change(el,{target:{value:'labelVal'}});
+        expect(el.value).toEqual('labelVal');
+        expect(screen.getAllByText('textarea_label')[0]).toBeInstanceOf(HTMLLabelElement);
+        cleanup();
+        r = render(<TextArea id="cidTextArea" didMountFunction={onDidMount}/>);
+        expect(r.container.getElementsByTagName('label').length).toEqual(0);
+
+        objRef.setReadonly(true);
+        expect(document.getElementById('cidTextArea')).toEqual(null);
+    });
+});
+
