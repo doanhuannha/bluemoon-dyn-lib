@@ -1,23 +1,19 @@
 import React, { ReactNode } from 'react'
 import { BaseComponent } from '../BaseComponent';
 import { DataPool } from '../DataPool';
+import HtmlTemplate from './HtmlTemplate';
 import { Pager } from './Pager';
 export interface DataListConfig {
     component?: any,
     buildItem?: (dataItem: any, index: number) => any
     htmlProps?: any,
     pagingHandler?: (sender: BaseComponent, pageIndex: number, pageSize: number) => void
-    noItem?: string
+    noItem?: string,
+    htmlItem?: string 
 
 }
 
 export default class DataList extends BaseComponent {
-    bindData = function(s: string, data: any) {
-        s = s.replace(/{(\w+)}/ig, (m: any, g: any)=>{
-            return escape(data[g]);
-        });
-        return s;
-    };
     renderComponent(): ReactNode {
 
         const config = this.props.options as DataListConfig;
@@ -47,11 +43,12 @@ export default class DataList extends BaseComponent {
             else if (config?.buildItem) {
                 let item = config.buildItem(data[j], j);
                 if (typeof (item) == 'string') {
-                    const html = this.bindData(item, data[j]);
-                    //dataComponents.push(<>{this.bindData(item, data[j])}</>);
-                    dataComponents.push(<div key={itemKey} dangerouslySetInnerHTML={{ __html: html }}></div>);
+                    dataComponents.push(<HtmlTemplate key={itemKey} options={{html: item}} value={data[j]} />);
                 }
                 else dataComponents.push(<div key={itemKey}>{item}</div>);
+            }
+            else if (config?.htmlItem) {
+                dataComponents.push(<HtmlTemplate key={itemKey} options={{html: config.htmlItem}} value={data[j]} />);
             }
             else {
                 dataComponents.push(<div key={itemKey}>{data[j]}</div>);
@@ -60,7 +57,7 @@ export default class DataList extends BaseComponent {
         else if (config.noItem) {
             let DynCom = DataPool.allControls[config.noItem];
             if (DynCom) dataComponents.push(<><DynCom key={this.props.id + 'no_data'} /></>);
-            else dataComponents.push(<span key={this.props.id + 'no_data'} dangerouslySetInnerHTML={{ __html: config.noItem }}></span>);
+            else dataComponents.push(<HtmlTemplate options={{ html: config.noItem }}/>);
 
         }
         else dataComponents.push(<div key={this.props.id + 'no_data'}>No data found</div>);

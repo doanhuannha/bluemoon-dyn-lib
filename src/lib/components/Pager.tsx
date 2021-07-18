@@ -1,6 +1,5 @@
 import React, { ReactNode } from 'react'
 import { BaseComponent } from '../BaseComponent';
-import { DataPool } from '../DataPool';
 export const Pager = (p: { pageIndex: number, pageSize: number, totalRow: number, parent: BaseComponent, pagingHandler: (sender: BaseComponent, pageIndex: number, pageSize: number) => void }) => {
     const pageListCount = 7;
     const currentPage = p.pageIndex;
