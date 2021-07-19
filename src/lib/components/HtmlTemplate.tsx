@@ -54,7 +54,6 @@ export default class HtmlTemplate extends BaseComponent{
         }
     }
     protected renderComponent() {
-
-        return <div ref={this.elContainer} style={{display: 'block'}}></div>
+        return <div ref={this.elContainer} className="tpl-renderer" style={{display: 'none'}}></div>
     }
 }

@@ -16,17 +16,17 @@ type RemoteOptions = {
     ]
 }
 window.utilities = {
-    getDefault: function(val: any, defaultValue: any): any{
-        if(val==null) return defaultValue;
+    getDefault: function (val: any, defaultValue: any): any {
+        if (val == null) return defaultValue;
         else return val;
     },
     parseJSON: function (json: string): any {
-		try {
-			return JSON.parse(json);
-		} catch (error) {
-			return new Function('return ' + json.replace(/\r/ig, ' ').replace(/\n/ig, ' ') + ';')();
-		}
-	},
+        try {
+            return JSON.parse(json);
+        } catch (error) {
+            return new Function('return ' + json.replace(/\r/ig, ' ').replace(/\n/ig, ' ') + ';')();
+        }
+    },
     setValue: function (obj: any, field: string, val: any): void {
         const pos = field.indexOf('.');
         if (pos > 0) {
@@ -307,7 +307,7 @@ type PostData = {
 */
 export const execApiAsync = function (url: string, requestData: any, recalled?: boolean): Promise<Response> {
     if (!requestData || !requestData.shouldCancel) {
-        if(!recalled) toggleLoadingPanel(true);
+        if (!recalled) toggleLoadingPanel(true);
         const cachedName = JSON.stringify({ url, requestData });
         const cachedData = execApiAsync.CachedPool.get(cachedName);
         if (cachedData) {
@@ -347,14 +347,23 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
                     headers.append(h, customRequestConfig.headers[h]);
                 }
                 requestData = customRequestConfig.body;
-                method = customRequestConfig.method || 'POST';
-                if (typeof requestData != 'string') requestData = JSON.stringify(requestData);
+                if(requestData){
+                    method = customRequestConfig.method || 'POST';
+                    if (typeof requestData != 'string') if (!(requestData instanceof FormData)) {
+                        headers.append('Content-Type', 'application/json');
+                        requestData = JSON.stringify(requestData);
+                    }
+                }
+                
 
             }
             else {
                 method = 'POST';
-                headers.append('Content-Type', 'application/json');
-                requestData = JSON.stringify(requestData);
+                if (!(requestData instanceof FormData)) {
+                    headers.append('Content-Type', 'application/json');
+                    requestData = JSON.stringify(requestData);
+                }
+
             }
         }
         return fetch(window.utilities.resolveUrl(url), {
@@ -398,20 +407,20 @@ execApiAsync.CachedPool = {
         for (const name in this.caches) if (this.caches[name].expired < new Date()) delete this.caches[name];
     }
 };
-const toggleLoadingPanel = function(show: boolean){
-    if(!show) toggleLoadingPanel.toggleCnt--; 
-    if(toggleLoadingPanel.toggleCnt==0){
+const toggleLoadingPanel = function (show: boolean) {
+    if (!show) toggleLoadingPanel.toggleCnt--;
+    if (toggleLoadingPanel.toggleCnt == 0) {
         window.utilities.showLoading(show);
     }
-    if(show) toggleLoadingPanel.toggleCnt++;
+    if (show) toggleLoadingPanel.toggleCnt++;
 };
 toggleLoadingPanel.toggleCnt = 0;
-window.utilities.showLoading = function(visible: boolean){
+window.utilities.showLoading = function (visible: boolean) {
     let panel = window.utilities.showLoading.panel;
-    if(!panel){
+    if (!panel) {
         const dynamicStyles = document.createElement('style');
         dynamicStyles.type = 'text/css';
-        document.head.appendChild(dynamicStyles);    
+        document.head.appendChild(dynamicStyles);
         dynamicStyles.sheet.insertRule('@keyframes spin360 { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }', 0);
 
         panel = document.createElement('div');
@@ -424,7 +433,7 @@ window.utilities.showLoading = function(visible: boolean){
         style.width = '100%';
         style.height = '100%';
         style.backgroundColor = '#CCC';
-        
+
         const spin = document.createElement('div');
         spin.innerHTML = '֎';
         spin.className = 'spin';
@@ -439,13 +448,13 @@ window.utilities.showLoading = function(visible: boolean){
         document.body.insertBefore(spin, document.body.firstChild);
 
     }
-    panel.spin.style.display = panel.style.display = visible ? 'inline-block': 'none';
-    if(visible){
-        panel.orgOverflow =  document.body.style.overflow || 'initial';
+    panel.spin.style.display = panel.style.display = visible ? 'inline-block' : 'none';
+    if (visible) {
+        panel.orgOverflow = document.body.style.overflow || 'initial';
         document.body.style.overflow = 'hidden';
     }
-    else{
-        if(panel.orgOverflow){
+    else {
+        if (panel.orgOverflow) {
             document.body.style.overflow = panel.orgOverflow;
             panel.orgOverflow = null;
         }
