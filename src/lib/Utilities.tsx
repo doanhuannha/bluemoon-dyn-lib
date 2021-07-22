@@ -306,7 +306,14 @@ type PostData = {
 };
 */
 export const execApiAsync = function (url: string, requestData: any, recalled?: boolean): Promise<Response> {
-    if (!requestData || !requestData.shouldCancel) {
+    if (requestData && requestData.shouldCancel === true){
+        return new Promise<Response>((resolve, reject) => {
+            console.log('return local data if any and cancel call api:' + url);
+            const response = new Response(JSON.stringify(requestData.localData || {}));
+            resolve(response);
+        });;
+    }
+    else {
         if (!recalled) toggleLoadingPanel(true);
         const cachedName = JSON.stringify({ url, requestData });
         const cachedData = execApiAsync.CachedPool.get(cachedName);
@@ -347,14 +354,14 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
                     headers.append(h, customRequestConfig.headers[h]);
                 }
                 requestData = customRequestConfig.body;
-                if(requestData){
+                if (requestData) {
                     method = customRequestConfig.method || 'POST';
                     if (typeof requestData != 'string') if (!(requestData instanceof FormData)) {
                         headers.append('Content-Type', 'application/json');
                         requestData = JSON.stringify(requestData);
                     }
                 }
-                
+
 
             }
             else {
@@ -388,10 +395,7 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
 
         });
     }
-    return new Promise<Response>((resolve, reject) => {
-        const response = new Response('{}');
-        resolve(response);
-    });;
+    
 };
 execApiAsync.CachedPool = {
     caches: {} as { [name: string]: { data: any, expired: Date } },
@@ -407,25 +411,35 @@ execApiAsync.CachedPool = {
         for (const name in this.caches) if (this.caches[name].expired < new Date()) delete this.caches[name];
     }
 };
-const toggleLoadingPanel = function (show: boolean) {
-    if (!show) toggleLoadingPanel.toggleCnt--;
-    if (toggleLoadingPanel.toggleCnt == 0) {
-        window.utilities.showLoading(show);
-    }
-    if (show) toggleLoadingPanel.toggleCnt++;
-};
-toggleLoadingPanel.toggleCnt = 0;
-window.utilities.showLoading = function (visible: boolean) {
-    let panel = window.utilities.showLoading.panel;
-    if (!panel) {
-        const dynamicStyles = document.createElement('style');
-        dynamicStyles.type = 'text/css';
-        document.head.appendChild(dynamicStyles);
-        dynamicStyles.sheet.insertRule('@keyframes spin360 { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }', 0);
 
-        panel = document.createElement('div');
-        window.utilities.showLoading.panel = panel;
+//toggleLoadingPanel.toggleCnt = 0;
+const toggleLoadingPanel = window.toggleLoadingPanel || function (visible: boolean) {
+
+    let panel = toggleLoadingPanel.panel;
+    if (!panel) {
+        //search for existing html element
+        panel = document.getElementsByClassName('loading-panel')[0];
+        if (panel) {
+            panel.spin = document.getElementsByClassName('loading-spin')[0];
+            panel.shownCnt = 1;
+            //console.log('init..' + visible + ', show count:' + panel.shownCnt);
+        }
+        else {
+            panel = document.createElement('div');
+
+            panel.spin = document.createElement('div');
+            //<style>@keyframes spin360 { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }</style>
+            const dynamicStyles = document.createElement('style');
+            document.head.appendChild(dynamicStyles);
+            dynamicStyles.sheet.insertRule('@keyframes spin360 { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }', 0);
+            panel.shownCnt = 0;
+
+        }
+        toggleLoadingPanel.panel = panel;
+
         panel.className = 'loading-panel';
+
+
         const style = panel.style;
         style.zIndex = '9999';
         style.opacity = 0.5;
@@ -434,30 +448,34 @@ window.utilities.showLoading = function (visible: boolean) {
         style.height = '100%';
         style.backgroundColor = '#CCC';
 
-        const spin = document.createElement('div');
+        const spin = panel.spin;
         spin.innerHTML = '֎';
-        spin.className = 'spin';
+        spin.className = 'loading-spin';
         spin.style.animation = 'spin360 4s linear infinite';
         spin.style.fontSize = '3em';
         spin.style.position = 'fixed';
         spin.style.left = '50%';
-        spin.style.top = '50%';
+        spin.style.top = '30%';
         spin.style.zIndex = '99999';
-        panel.spin = spin;
+
         document.body.insertBefore(panel, document.body.firstChild);
         document.body.insertBefore(spin, document.body.firstChild);
 
     }
-    panel.spin.style.display = panel.style.display = visible ? 'inline-block' : 'none';
-    if (visible) {
-        panel.orgOverflow = document.body.style.overflow || 'initial';
-        document.body.style.overflow = 'hidden';
-    }
-    else {
-        if (panel.orgOverflow) {
-            document.body.style.overflow = panel.orgOverflow;
-            panel.orgOverflow = null;
+    if (panel.shownCnt > 0) panel.shownCnt += visible ? 0 : -1;
+    //console.log('from lib loading..' + visible + ', show count:' + panel.shownCnt +' at ' + new Date().getTime());
+    if (panel.shownCnt === 0) {
+        panel.spin.style.display = panel.style.display = visible ? 'inline-block' : 'none';
+        if (visible) {
+            panel.orgOverflow = document.body.style.overflow || 'initial';
+            document.body.style.overflow = 'hidden';
+        }
+        else {
+            if (panel.orgOverflow) {
+                document.body.style.overflow = panel.orgOverflow;
+                panel.orgOverflow = null;
+            }
         }
     }
-}
-window.utilities.showLoading.panel = null as HTMLDivElement;
+    panel.shownCnt += visible ? 1 : 0;
+} as any;

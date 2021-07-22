@@ -198,7 +198,8 @@ declare global {
         storage: {
             get: (name: string) => any,
             set: (name: string, value: any) => void
-        }
+        },
+        toggleLoadingPanel(visible:boolean): void 
     }
 }
 
