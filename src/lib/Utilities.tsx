@@ -246,6 +246,11 @@ window.validator = {
             }));
             if (!valid) return opt.msg;
             else return null;
+        },
+        custom: function (n: string, o: string, opt: RuleOption): string {
+            if (window.validator.isEmpty(n)) return null;
+            if (!opt.validate(n,o)) return opt.msg;
+            else return null;
         }
     }
 };
