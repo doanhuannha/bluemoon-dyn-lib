@@ -8,7 +8,7 @@ import { execApiAsync } from './Utilities';
 export class Field extends React.Component<IFieldProps, IComponentState> implements IField {
     static contextType = AppContext;
     public control: RefObject<BaseComponent>;
-
+    private delayValue = null as any;
     constructor(props: IFieldProps) {
         super(props);
         this.control = React.createRef();
@@ -32,6 +32,13 @@ export class Field extends React.Component<IFieldProps, IComponentState> impleme
             }
             execApiAsync(url, postData).then(response => response.json()).then(data => {
                 this.control.current?.setDataSource(data);
+                if(this.delayValue){
+                    console.log('bind value now,ds is ready');
+                    console.log(this.delayValue);
+                    console.log(data);
+                    this.control.current?.setValue(this.delayValue.value, this.delayValue.isDefault); 
+                    this.delayValue = null;
+                }
             }).catch(error => {
                 console.log('error on request:'+ url);
                 console.log(error);
@@ -46,11 +53,23 @@ export class Field extends React.Component<IFieldProps, IComponentState> impleme
     public bindValue(val: any, isDefault: boolean): boolean {
         if (this.control.current == null) return false;
         let value = undefined;
-        if (this.props.dataField) value = window.utilities.extractValue(val, this.props.dataField);
-        if (value != undefined) this.control.current.setValue(value, isDefault);
-        value = undefined;
         if (this.props.sourceField) value = window.utilities.extractValue(val, this.props.sourceField);
         if (value != undefined) this.control.current.setDataSource(value);
+        value = undefined;
+        if (this.props.dataField) value = window.utilities.extractValue(val, this.props.dataField);
+        if (value != undefined) {
+            if(this.props.dataSourceApi && this.control.current.state.dataSource == null){
+                console.log('delay bind value, wait for data source');
+                //should not bind value now
+                this.delayValue = {value, isDefault};
+            }
+            else{
+                this.control.current.setValue(value, isDefault);    
+            }
+            
+        }
+        
+        
         return true;
     }
 }
