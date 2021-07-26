@@ -22,7 +22,7 @@ export abstract class BaseComponent extends React.Component<IBaseComponentProps 
         this.defaultValue = props?.defaultValue;
         
     }
-	public getDataSource(data: any) {
+	public getDataSource() {
         return this.state.dataSource;
     }
     public setDataSource(data: any) {

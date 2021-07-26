@@ -22,32 +22,29 @@ export class Field extends React.Component<IFieldProps, IComponentState> impleme
         }
         else return <Control key={this.props.id} id={this.props.id} ref={this.control} {...this.props} />;
     }
-    public rebind(url:string = null, postData:any = undefined){ //bind data source for the component
+    public rebind(url: string = null, postData: any = undefined) { //bind data source for the component
         url = url || this.props.dataSourceApi;
         if (url) {
-            
+
             if (this.props.dataApiParamsFunc) {
-                if(postData == undefined) postData = this.props.dataApiParamsFunc(this.control.current, url, this.context);
+                if (postData == undefined) postData = this.props.dataApiParamsFunc(this.control.current, url, this.context);
                 else postData = window.utilities.merge(this.props.dataApiParamsFunc(this.control.current, url, this.context), postData);
             }
             execApiAsync(url, postData).then(response => response.json()).then(data => {
                 this.control.current?.setDataSource(data);
-                if(this.delayValue){
-                    console.log('bind value now,ds is ready');
-                    console.log(this.delayValue);
-                    console.log(data);
-                    this.control.current?.setValue(this.delayValue.value, this.delayValue.isDefault); 
+                if (this.delayValue) {
+                    this.control.current?.setValue(this.delayValue.value, this.delayValue.isDefault);
                     this.delayValue = null;
                 }
             }).catch(error => {
-                console.log('error on request:'+ url);
+                console.log('error on request:' + url);
                 console.log(error);
             });
         }
     }
-    componentDidMount() { 
+    componentDidMount() {
         if (this.control.current == null) return;
-        if(this.control.current.state.dataSource == null) this.rebind();
+        if (this.control.current.state.dataSource == null) this.rebind();
     }
 
     public bindValue(val: any, isDefault: boolean): boolean {
@@ -58,18 +55,17 @@ export class Field extends React.Component<IFieldProps, IComponentState> impleme
         value = undefined;
         if (this.props.dataField) value = window.utilities.extractValue(val, this.props.dataField);
         if (value != undefined) {
-            if(this.props.dataSourceApi && this.control.current.state.dataSource == null){
-                console.log('delay bind value, wait for data source');
+            if (this.props.dataSourceApi && this.control.current.getDataSource() == null) {
                 //should not bind value now
-                this.delayValue = {value, isDefault};
+                this.delayValue = { value, isDefault };
+
             }
-            else{
-                this.control.current.setValue(value, isDefault);    
+            else {
+                this.control.current.setValue(value, isDefault);
             }
-            
+
         }
-        
-        
+
         return true;
     }
 }

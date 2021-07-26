@@ -71,7 +71,7 @@ window.utilities = {
     },
     loadJs: function (url: string, callback: (arg?: any) => void, callbackArg?: any): void {
         var e = document.createElement('script');
-        e.src = window.utilities.resolveUrl(url);
+        e.src = url;
         e.type = 'text/javascript';
         e.setAttribute('callbackArg', callbackArg);
         e.addEventListener('load', () => {
@@ -314,7 +314,7 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
     if (requestData && requestData.shouldCancel === true){
         return new Promise<Response>((resolve, reject) => {
             console.log('return local data if any and cancel call api:' + url);
-            const response = new Response(JSON.stringify(requestData.localData || {}));
+            const response = new Response(JSON.stringify(requestData.localData == undefined ? null : requestData.localData));
             resolve(response);
         });;
     }
