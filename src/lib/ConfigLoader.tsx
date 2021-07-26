@@ -2,7 +2,6 @@ import React from 'react';
 import { DynConfig } from './DynConfig';
 import { DataPool } from './DataPool';
 import { View } from './View';
-
 export class ConfigLoader extends React.Component<ConfigLoaderProps, ConfigLoaderState> {
     private loaded: boolean = false;
     constructor(props: ConfigLoaderProps) {
@@ -49,6 +48,12 @@ export class ConfigLoader extends React.Component<ConfigLoaderProps, ConfigLoade
     }
     componentDidMount() {
         //if(this.loaded) return;
+        if(window.bluemoon?.reactjs?.staticFieldDefs){
+            window.utilities.importFieldDefs(window.bluemoon.reactjs.staticFieldDefs);
+        }
+        if(window.bluemoon?.reactjs?.staticViewDefs){
+            window.utilities.importViewDefs(window.bluemoon.reactjs.staticViewDefs);
+        }
         let me = this;
         let index = 0;
         let urls = this.props.fieldUrls.concat(this.props.viewUrls);

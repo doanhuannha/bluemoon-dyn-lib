@@ -199,7 +199,13 @@ declare global {
             get: (name: string) => any,
             set: (name: string, value: any) => void
         },
-        toggleLoadingPanel(visible:boolean): void 
+        toggleLoadingPanel(visible: boolean): void,
+        bluemoon: {
+            reactjs: {
+                staticViewDefs: any,
+                staticFieldDefs: any
+            }
+        }
     }
 }
 

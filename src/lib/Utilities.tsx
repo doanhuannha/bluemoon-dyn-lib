@@ -71,7 +71,7 @@ window.utilities = {
     },
     loadJs: function (url: string, callback: (arg?: any) => void, callbackArg?: any): void {
         var e = document.createElement('script');
-        e.src = url;
+        e.src = this.resolveUrl(url);
         e.type = 'text/javascript';
         e.setAttribute('callbackArg', callbackArg);
         e.addEventListener('load', () => {
