@@ -54,17 +54,23 @@ export class ConfigLoader extends React.Component<ConfigLoaderProps, ConfigLoade
         if(window.bluemoon?.reactjs?.staticViewDefs){
             window.utilities.importViewDefs(window.bluemoon.reactjs.staticViewDefs);
         }
-        let me = this;
-        let index = 0;
-        let urls = this.props.fieldUrls.concat(this.props.viewUrls);
-        this.loadThenNext(urls, index, function () {
-            me.loaded = true;
-            me.forceUpdate();
-            if (me.props.callback) me.props.callback();
-            me.loadComponent();
-
-
-        });
+        if(this.props.fieldUrls || this.props.viewUrls){
+            let me = this;
+            let index = 0;
+            let urls = [] as string[];
+            urls = urls.concat(this.props.fieldUrls || []);
+            urls = urls.concat(this.props.viewUrls || []);
+            this.loadThenNext(urls, index, function () {
+                me.loaded = true;
+                me.forceUpdate();
+                if (me.props.callback) me.props.callback();
+                me.loadComponent();
+    
+    
+            });
+        }
+        else this.loadComponent();
+        
 
     }
     render() {

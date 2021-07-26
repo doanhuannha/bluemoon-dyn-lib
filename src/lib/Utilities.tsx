@@ -15,7 +15,9 @@ type RemoteOptions = {
         }
     ]
 }
+
 window.utilities = {
+    ...window.utilities,
     getDefault: function (val: any, defaultValue: any): any {
         if (val == null) return defaultValue;
         else return val;
@@ -457,12 +459,15 @@ const toggleLoadingPanel = window.toggleLoadingPanel || function (visible: boole
         spin.innerHTML = '֎';
         spin.className = 'loading-spin';
         spin.style.animation = 'spin360 4s linear infinite';
-        spin.style.fontSize = '3em';
+        spin.style.fontSize = '5em';
         spin.style.position = 'fixed';
-        spin.style.left = '50%';
+        spin.style.left = 'calc(50% - 25px)';
         spin.style.top = '30%';
-        spin.style.zIndex = '99999';
-
+        spin.style.width = '50px';
+        spin.style.height = '50px';
+        spin.style.lineHeight = '53px';
+        spin.style.fontFamily = 'Courier New';
+        spin.style.textAlign = 'center';
         document.body.insertBefore(panel, document.body.firstChild);
         document.body.insertBefore(spin, document.body.firstChild);
 
