@@ -7,7 +7,8 @@ export interface TableConfig {
         headerLabel: string,
         dataField: string,
         component?: string,
-        buildItem?: (dataItem: any, index: number) => any
+        buildItem?: (dataItem: any, index: number) => any,
+        htmlItem?: string
     }[],
     htmlProps?: any,
     pageSize?: number,
@@ -51,6 +52,9 @@ export default class Table extends BaseComponent {
                     let item = config.columns[i].buildItem(data[j], j);
                     if (typeof (item) === 'string') td.push(<td key={this.props.id + 'd' + j + '_' + i} dangerouslySetInnerHTML={{ __html: item }}></td>);
                     else td.push(<td key={this.props.id + 'd' + j + '_' + i}>{item}</td>);
+                }
+                else if (config.columns[i].htmlItem){
+                    td.push(<td key={this.props.id + 'd' + j + '_' + i} dangerouslySetInnerHTML={{ __html: config.columns[i].htmlItem }}></td>);
                 }
                 else {
                     td.push(<td key={this.props.id + 'd' + j + '_' + i}>{data[j][config.columns[i].dataField]}</td>);
