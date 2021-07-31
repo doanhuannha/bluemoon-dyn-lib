@@ -20,7 +20,6 @@ export class ConfigLoader extends React.Component<ConfigLoaderProps, ConfigLoade
         const ret = {};
         for (let i = 0; i < atts.length; i++) {
             if(atts[i].name=='class'){
-                console.log('class='+atts[i].value);
                 ret['className'] = atts[i].value;
             }
             else ret[atts[i].name] = atts[i].value;

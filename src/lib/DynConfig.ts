@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import { DataPool } from './DataPool';
 
 export const DynConfig = {
+  debug: false,
   apiCache: true,
   appDOM: ReactDOM,
   exportLayouts: function (layouts: KeyPair) {

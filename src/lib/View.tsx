@@ -3,7 +3,7 @@ import { DataPool } from './DataPool';
 import { ViewFieldDefine, ViewDefine, IViewProps, IViewState, IView, IComponent, AppContext, AppContextProvider, SubmitParamsFunction, IFieldItem, IComponentProps } from './Defs';
 import { DynConfig } from './DynConfig';
 import { Field } from './Field';
-import { execApiAsync } from './Utilities';
+import { execApiAsync, _debug } from './Utilities';
 
 
 export class View extends React.Component<IViewProps, IViewState> implements IView {
@@ -43,7 +43,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
             this.initView(DataPool.allViews[props.name]);
         }
         else {
-            console.log('Can not find view: ' + props.name + '. Try to load from server at settings/' + props.name + '.js');
+            _debug('Can not find view: ' + props.name + '. Try to load from server at settings/' + props.name + '.js');
             window.utilities.loadJs('settings/' + props.name + '.js', (view: View) => {
                 if (DataPool.allViews[view.props.name]) {
                     view.initView(DataPool.allViews[view.props.name]);
@@ -52,7 +52,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
                     });
                 }
                 else {
-                    console.log('Finally, can not load view: ' + view.props.name);
+                    _debug('Finally, can not load view: ' + view.props.name);
                 }
 
             }, this);
@@ -143,10 +143,10 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
         }
         execApiAsync(url, postData).then(response => response.json()).then(data => {
             if (data != null) this.bindData(this.dataField ? window.utilities.extractValue(data, this.dataField) : data, false);
-            else console.log('dataApi return null: ' + url);
+            else _debug('dataApi return null: ' + url);
         }).catch(error => {
-            console.log('error on request:' + url);
-            console.log(error);
+            _debug('error on request:' + url);
+            _debug(error);
         });
     }
     public componentDidMount() {
@@ -243,7 +243,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
     }
     public submitData(): Promise<Response> {
         if (!this.isValidData()) {
-            console.log('Invalid data to submit');
+            _debug('Invalid data to submit');
             return null;
         }
         return this.submitDataToApi(this.submitApi, this.submitApiParams);
@@ -261,16 +261,16 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
             for (let i = 0; i < this.fields.length; i++) {
                 if (DataPool.allFields[this.fields[i].name]) {
                     //field Props
-                    //console.log('field:'+this.fields[i].name);
-                    //console.log(DataPool.allFields[this.fields[i].name]);
-                    //console.log('view redefined');
-                    //console.log(this.fields[i]);
+                    //_debug('field:'+this.fields[i].name);
+                    //_debug(DataPool.allFields[this.fields[i].name]);
+                    //_debug('view redefined');
+                    //_debug(this.fields[i]);
 
                     const fieldProps = {} as IComponentProps;
                     //window.utilities.merge(DataPool.allFields[this.fields[i].name], this.fields[i]);
                     window.utilities.merge(fieldProps, DataPool.allFields[this.fields[i].name], this.fields[i]);
-                    //console.log('overwritten');
-                    //console.log(fieldProps);
+                    //_debug('overwritten');
+                    //_debug(fieldProps);
                     items.push(<Field ref={this.children[i]}
                         parent={this}
                         //{...DataPool.allFields[this.fields[i].name]}
@@ -284,7 +284,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
                 }
                 else {
                     items.push(<div key={this.props.id + this.fields[i].name + i}>Field "{this.fields[i].name}" should be here</div>);
-                    console.log('Can not load field name: ' + this.fields[i].name);
+                    _debug('Can not load field name: ' + this.fields[i].name);
                 }
 
             }
@@ -345,7 +345,8 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
                     this.templateLayout.status = 'loaded';
                     this.forceUpdate();
                 }).catch(error => {
-                    console.log(error);
+                    _debug('error on request:' + this.templateLayout.template);
+                    _debug(error);
                 });
         }
 

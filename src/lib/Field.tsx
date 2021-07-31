@@ -2,7 +2,7 @@ import React, { RefObject } from 'react';
 import { BaseComponent } from './BaseComponent';
 import { DataPool } from './DataPool';
 import { IComponentProps as IFieldProps, IComponentState, IField, AppContext } from './Defs';
-import { execApiAsync } from './Utilities';
+import { execApiAsync, _debug } from './Utilities';
 
 
 export class Field extends React.Component<IFieldProps, IComponentState> implements IField {
@@ -17,7 +17,6 @@ export class Field extends React.Component<IFieldProps, IComponentState> impleme
         let name = this.props.type;
         const Control = DataPool.allControls[name];
         if (Control == null) {
-            //console.log('Can not find control (component): ' + name);
             return <div>Can not find control (component) "{name}"</div>;
         }
         else return <Control key={this.props.id} id={this.props.id} ref={this.control} {...this.props} />;
@@ -37,8 +36,8 @@ export class Field extends React.Component<IFieldProps, IComponentState> impleme
                     this.delayValue = null;
                 }
             }).catch(error => {
-                console.log('error on request:' + url);
-                console.log(error);
+                _debug('error on request:' + url);
+                _debug(error);
             });
         }
     }

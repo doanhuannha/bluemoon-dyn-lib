@@ -315,7 +315,7 @@ type PostData = {
 export const execApiAsync = function (url: string, requestData: any, recalled?: boolean): Promise<Response> {
     if (requestData && requestData.shouldCancel === true){
         return new Promise<Response>((resolve, reject) => {
-            console.log('return local data if any and cancel call api:' + url);
+            _debug('return local data if any and cancel call api: ' + url);
             const response = new Response(JSON.stringify(requestData.localData == undefined ? null : requestData.localData));
             resolve(response);
         });;
@@ -337,7 +337,7 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
                 });
             }
             else return new Promise<Response>((resolve, reject) => {
-                console.log('load from cache:' + url);
+                _debug('load from cache: ' + url);
                 const response = new Response(cachedData);
                 resolve(response);
                 toggleLoadingPanel(false);
@@ -394,6 +394,7 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
                     toggleLoadingPanel(false);
                 });
             }).catch(r => {
+                
                 return new Promise<Response>((resolve, reject) => {
                     reject(r);
                     toggleLoadingPanel(false);
@@ -429,7 +430,7 @@ const toggleLoadingPanel = window.toggleLoadingPanel || function (visible: boole
         if (panel) {
             panel.spin = document.getElementsByClassName('loading-spin')[0];
             panel.shownCnt = 1;
-            //console.log('init..' + visible + ', show count:' + panel.shownCnt);
+            //_debug('init..' + visible + ', show count:' + panel.shownCnt);
         }
         else {
             panel = document.createElement('div');
@@ -473,7 +474,7 @@ const toggleLoadingPanel = window.toggleLoadingPanel || function (visible: boole
 
     }
     if (panel.shownCnt > 0) panel.shownCnt += visible ? 0 : -1;
-    //console.log('from lib loading..' + visible + ', show count:' + panel.shownCnt +' at ' + new Date().getTime());
+    //_debug('from lib loading..' + visible + ', show count:' + panel.shownCnt +' at ' + new Date().getTime());
     if (panel.shownCnt === 0) {
         panel.spin.style.display = panel.style.display = visible ? 'inline-block' : 'none';
         if (visible) {
@@ -488,4 +489,28 @@ const toggleLoadingPanel = window.toggleLoadingPanel || function (visible: boole
         }
     }
     panel.shownCnt += visible ? 1 : 0;
+} as any;
+export const _debug = function (msg: any, persistent: boolean | number) {
+    if(!DynConfig.debug) return;
+    if (_debug._debugPanel == null) {
+        var panel = document.createElement('div');
+        panel.style.position = 'fixed';
+        panel.style.left = '0px';
+        panel.style.bottom = '0px';
+        panel.style.padding = '10px';
+        panel.style.backgroundColor = '#000';
+        panel.style.color = '#FFF';
+        document.body.appendChild(panel);
+        _debug._debugPanel = panel;
+    }
+    _debug._debugPanel.style.display = 'block';
+    _debug._debugPanel.innerHTML += JSON.stringify(msg) + '<br/>';
+    if (persistent === true) { }
+    else {
+        clearTimeout(_debug._debugPanel.timer);
+        _debug._debugPanel.timer = setTimeout(function (obj) {
+            obj.style.display = 'none';
+            obj.innerHTML = '';
+        }, persistent || 5000, _debug._debugPanel);
+    }
 } as any;
