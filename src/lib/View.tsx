@@ -17,7 +17,8 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
     private templateLayout: ITemplateLayout;
     private layout: {
         name: string,
-        options?: any
+        options?: any,
+        templateHtml?: string
     }
     private dataField: string;
     public container: Element;
@@ -70,19 +71,28 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
         if (this.fields) for (let i = 0; i < this.fields.length; i++) {
             this.children[i] = React.createRef();
         }
-        if (this.viewDef.templateUrl) {
-            this.templateLayout = {
-                template: this.viewDef.templateUrl,
-                status: 'init',
-                //dataReady: false,
-                html: null
+        if (this.viewDef.layout?.name == 'htmllayout') {
+            const opts = this.viewDef.layout?.options;
+            if (opts.templateUrl) {
+                this.templateLayout = {
+                    template: opts.templateUrl,
+                    status: 'init',
+                    html: null
+                }
             }
+            else if (opts.htmlTemplate) {
+                this.templateLayout = {
+                    template: 'html',
+                    status: 'init',
+                    html: opts.htmlTemplate
+                }
+            }
+
         }
         else if (this.props.children) {
             this.templateLayout = {
                 template: 'inline-template',
                 status: 'init',
-                //dataReady: false,
                 html: null
             }
         }
@@ -167,7 +177,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
     }
     public toggleFields(n: any, options: [{ match: (v: any) => boolean, fields: AppliedField[] }]) {
         options.map(o => {
-            if (o.match(n)===true) {
+            if (o.match(n) === true) {
                 o.fields.map(f => {
                     f.names.map(name => {
                         let field = this.find(name, true) as Field;
@@ -252,7 +262,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
                     //console.log(DataPool.allFields[this.fields[i].name]);
                     //console.log('view redefined');
                     //console.log(this.fields[i]);
-                    
+
                     const fieldProps = {} as IComponentProps;
                     //window.utilities.merge(DataPool.allFields[this.fields[i].name], this.fields[i]);
                     window.utilities.merge(fieldProps, DataPool.allFields[this.fields[i].name], this.fields[i]);
@@ -305,7 +315,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
             if (this.state.visible) {
                 if (this.layout) {
                     const Layout = DataPool.allLayouts[this.layout.name];
-                    return <Layout {...this.layout.options}>{items}</Layout>
+                    return <Layout {...this.layout.options} view={this}>{items}</Layout>
                 }
                 else return <>{items}</>;
             }
@@ -316,16 +326,26 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
     }
     private loadLayoutTemplate() {
 
-        this.templateLayout.status = 'loading';
-        fetch(window.utilities.resolveUrl(this.templateLayout.template))
-            .then(response => response.text())
-            .then(text => {
-                this.templateLayout.html = text;
-                this.templateLayout.status = 'loaded';
+        if (this.templateLayout.html) {
+            this.templateLayout.status = 'loaded';
+            new Promise(r => r(null)).then(() => {
                 this.forceUpdate();
-            }).catch(error => {
-                console.log(error);
             });
+
+        }
+        else {
+            this.templateLayout.status = 'loading';
+            fetch(window.utilities.resolveUrl(this.templateLayout.template))
+                .then(response => response.text())
+                .then(text => {
+                    this.templateLayout.html = text;
+                    this.templateLayout.status = 'loaded';
+                    this.forceUpdate();
+                }).catch(error => {
+                    console.log(error);
+                });
+        }
+
     }
 
 }

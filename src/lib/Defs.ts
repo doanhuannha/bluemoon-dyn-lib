@@ -116,7 +116,6 @@ export type ViewFieldDefine = {
 };
 export type ViewDefine = {
     fields: ViewFieldDefine[],
-    templateUrl?: string,
     submitApi?: string,
     submitApiParamsFunc?: SubmitParamsFunction,
     dataApi?: string,

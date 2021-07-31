@@ -1,7 +1,16 @@
 import React from "react";
 import { AppContextProvider } from "./Defs";
 
-
+export class HtmlLayout extends React.Component<{ className?: string }> {
+    public render() {
+        let div = [] as any;
+        const className = 'flow' + (this.props.className ? ' ' + this.props.className : '');
+        React.Children.map(this.props.children, (e, i) => {
+            div.push(<div key={'item-' + i} className={className}><AppContextProvider value={this.context}>{e}</AppContextProvider></div>);
+        });
+        return <>{div}</>;
+    }
+}
 export class FlowLayout extends React.Component<{ className?: string }> {
     public render() {
         let div = [] as any;
