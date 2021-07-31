@@ -17,8 +17,10 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
     private templateLayout: ITemplateLayout;
     private layout: {
         name: string,
-        options?: any,
-        templateHtml?: string
+        options?: {
+            templateUrl?: string,
+            htmlTemplate?: string
+        } & { [name: string]: any }
     }
     private dataField: string;
     public container: Element;
@@ -71,8 +73,9 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
         if (this.fields) for (let i = 0; i < this.fields.length; i++) {
             this.children[i] = React.createRef();
         }
-        if (this.viewDef.layout?.name == 'htmllayout') {
-            const opts = this.viewDef.layout?.options;
+        if (this.layout?.name == 'htmllayout') {
+            const opts = this.layout?.options;
+
             if (opts.templateUrl) {
                 this.templateLayout = {
                     template: opts.templateUrl,

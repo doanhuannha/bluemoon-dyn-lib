@@ -14,6 +14,7 @@ import CheckBoxList from './lib/components/CheckBoxList';
 import RadioList from './lib/components/RadioList';
 import DataList from './lib/components/DataList';
 import TextArea from './lib/components/TextArea';
+import HtmlTemplate from './lib/components/HtmlTemplate';
 
 export * from './lib/Defs';
 export * from './lib/View';
@@ -41,7 +42,8 @@ DynConfig.exportControls({
   'checkboxlist': CheckBoxList,
   'radiolist': RadioList,
   'datalist': DataList,
-  'textarea': TextArea
+  'textarea': TextArea,
+  'htmltemplate': HtmlTemplate
 });
 
 DynConfig.exportLayouts({

@@ -30,7 +30,10 @@ export interface IViewProps {
     onDidUpdate?: (sender: React.Component<IViewProps, IViewState>) => void;
     layout?: {
         name: string,
-        options?: any
+        options?: {
+            templateUrl?: string,
+            htmlTemplate?: string
+        } & { [name: string]: any }
     },
     linkingObjects?: { [name: string]: any },
     dataField?: string,
@@ -124,7 +127,10 @@ export type ViewDefine = {
     deleteApiParamsFunc?: SubmitParamsFunction,
     layout?: {
         name: string,
-        options?: any
+        options?: {
+            templateUrl?: string,
+            htmlTemplate?: string
+        } & { [name: string]: any }
     },
     dataField?: string,
     options?: any
