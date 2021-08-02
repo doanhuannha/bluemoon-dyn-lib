@@ -26,7 +26,8 @@ export * from './lib/DynConfig';
 export * from './lib/DataPool';
 export * from './lib/DataStorage';
 export {TableConfig} from './lib/components/Table';
-export {execApiAsync} from './lib/Utilities';   
+export {execApiAsync, _debug} from './lib/Utilities';
+   
 
 
 

@@ -36,7 +36,7 @@ export class Field extends React.Component<IFieldProps, IComponentState> impleme
                     this.delayValue = null;
                 }
             }).catch(error => {
-                _debug('error on request:' + url);
+                _debug('error on request: ' + url);
                 _debug(error);
             });
         }

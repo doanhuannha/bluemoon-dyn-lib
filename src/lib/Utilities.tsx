@@ -251,7 +251,7 @@ window.validator = {
         },
         custom: function (n: string, o: string, opt: RuleOption): string {
             if (window.validator.isEmpty(n)) return null;
-            if (!opt.validate(n,o)) return opt.msg;
+            if (!opt.validate(n, o)) return opt.msg;
             else return null;
         }
     }
@@ -313,7 +313,7 @@ type PostData = {
 };
 */
 export const execApiAsync = function (url: string, requestData: any, recalled?: boolean): Promise<Response> {
-    if (requestData && requestData.shouldCancel === true){
+    if (requestData && requestData.shouldCancel === true) {
         return new Promise<Response>((resolve, reject) => {
             _debug('return local data if any and cancel call api: ' + url);
             const response = new Response(JSON.stringify(requestData.localData == undefined ? null : requestData.localData));
@@ -382,28 +382,43 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
         }
         return fetch(window.utilities.resolveUrl(url), {
             method,
+            credentials: 'include',
             body: requestData,
             headers: headers
         }).then(res => {
-            return res.text().then(s => {
-                const expired = new Date();
-                expired.setTime(expired.getTime() + 5000);//cache 5 seconds
-                if (DynConfig.apiCache) execApiAsync.CachedPool.set(cachedName, s, expired);
-                return new Promise<Response>((resolve, reject) => {
-                    resolve(new Response(s));
-                    toggleLoadingPanel(false);
-                });
-            }).catch(r => {
-                
-                return new Promise<Response>((resolve, reject) => {
-                    reject(r);
-                    toggleLoadingPanel(false);
-                });
-            });
+            if (res.ok) {
+                return res.text().then(s => {
+                    const expired = new Date();
+                    expired.setTime(expired.getTime() + 5000);//cache 5 seconds
+                    if (DynConfig.apiCache) execApiAsync.CachedPool.set(cachedName, s, expired);
+                    return new Promise<Response>((resolve, reject) => {
+                        resolve(new Response(s));
+                        toggleLoadingPanel(false);
+                    });
+                }).catch(r => {
 
+                    return new Promise<Response>((resolve, reject) => {
+                        reject(r);
+                        toggleLoadingPanel(false);
+                    });
+                });
+            }
+            else {
+                return new Promise<Response>((resolve, reject) => {
+                    execApiAsync.CachedPool.del(cachedName)
+                    reject({
+                        url,
+                        status: res.status,
+                        statusText: res.statusText,
+                        requestData: JSON.parse(requestData)
+                    });
+                    toggleLoadingPanel(false);
+                });
+                
+            }
         });
     }
-    
+
 };
 execApiAsync.CachedPool = {
     caches: {} as { [name: string]: { data: any, expired: Date } },
@@ -414,6 +429,9 @@ execApiAsync.CachedPool = {
     get: function (name: string) {
         this.cleanup();
         return this.caches[name]?.data;
+    },
+    del: function (name: string) {
+        delete this.caches[name];
     },
     cleanup: function () {
         for (const name in this.caches) if (this.caches[name].expired < new Date()) delete this.caches[name];
@@ -491,9 +509,10 @@ const toggleLoadingPanel = window.toggleLoadingPanel || function (visible: boole
     panel.shownCnt += visible ? 1 : 0;
 } as any;
 export const _debug = function (msg: any, persistent: boolean | number) {
-    if(!DynConfig.debug) return;
+    if (!DynConfig.debug) return;
     if (_debug._debugPanel == null) {
         var panel = document.createElement('div');
+        panel.className = 'debug-info';
         panel.style.position = 'fixed';
         panel.style.left = '0px';
         panel.style.bottom = '0px';
