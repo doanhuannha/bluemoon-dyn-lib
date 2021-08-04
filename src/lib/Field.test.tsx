@@ -2,40 +2,68 @@ import React, { RefObject } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { BaseComponent } from './BaseComponent';
 import { DynConfig } from './DynConfig';
-import './Utilities.tsx';
 import { Field } from './Field';
-
-
-describe('test field', () => {
-    class Response{
-        private body: string;
-        constructor(s:string){
-            this.body = s;
+/*
+import './Utilities'; 
+import { execApiAsync } from './Utilities';
+//let { execApiAsync } = require('./Utilities');
+execApiAsync = function(url: string, requestData: any, recalled?: boolean): Promise<Response> {
+    return new Promise<Response>((resolve, reject) => {
+        if (requestData == null) {
+            reject('No post data');
+            return;
         }
-        json(){
-            return new Promise<any>((r)=>{
-                (r(JSON.parse(this.body)))
+
+        const response = new Response('[{"value":"val1"}, {"value":"val2"}]');
+        resolve(response);
+
+    });
+}
+*/
+describe('test field', () => {
+
+    class Response {
+        private body: any;
+        public ok: boolean;
+        public status: number;
+
+        constructor(body?: BodyInit, init?: ResponseInit) {
+            this.body = body;
+            this.ok = true;
+            this.status = 200;
+        }
+
+        json() {
+            return new Promise<any>(r => {
+                r(JSON.parse(this.body));
+            });
+        }
+        text() {
+            return new Promise<string>(r => {
+                r(this.body);
             });
         }
     };
-    
-    global.fetch = (input: RequestInfo, init?: RequestInit): Promise<any>=>{
+
+    //*
+    global.Response = Response as any;
+    global.fetch = (input: RequestInfo, init?: RequestInit): Promise<any> => {
         const url = input as string;
-        if(url.startsWith('/fakeApiDs')){
-            realDatasourceParams = JSON.parse(init.body as string)
+        if (url.startsWith('/fakeApiDs')) {
+            realDatasourceParams = JSON.parse(init.body as string || 'null');
         }
-        return new Promise<Response>((resolve,reject)=>{
-            if(realDatasourceParams==null){ 
+        return new Promise<Response>((resolve, reject) => {
+            if (realDatasourceParams == null) {
                 reject('No post data');
                 return;
             }
-
+            console.log('api return data');
             const response = new Response('[{"value":"val1"}, {"value":"val2"}]');
             resolve(response);
-    
+
         });
     };
-
+    //*/
     const datasourceParams = {
         r1: 'vr1',
         r2: 'vr2'
@@ -43,24 +71,25 @@ describe('test field', () => {
     let realDatasourceParams = null as any;
     let callBackDidUpdated = null as any;
     class MyComp extends BaseComponent {
-        public componentDidUpdate(){
-            if(callBackDidUpdated) callBackDidUpdated();
+        public componentDidUpdate() {
+            if (this.props.didUpdated) this.props.didUpdated();
+
         }
         protected renderComponent(): React.ReactNode {
             const data = this.state.dataSource;
             const items = [];
-            if(data!=null){
-                for(let i=0;i<data.length;i++){
-                    items.push(<li key={'ii'+i}>{data[i].value}</li>);
+            if (data != null) {
+                for (let i = 0; i < data.length; i++) {
+                    items.push(<li key={'ii' + i}>{data[i].value}</li>);
                 }
             }
-            else{
+            else {
                 items.push(<li key={'ii'}>no-item</li>);
             }
             return (<>
                 <div>{this.state.value}</div>
                 <ul>{items}</ul>
-        
+
             </>);
         }
 
@@ -69,13 +98,14 @@ describe('test field', () => {
     DynConfig.exportControls({
         'myControl': MyComp
     });
-    const dataApiParamsFunc = jest.fn(()=>{
+    const dataApiParamsFunc = jest.fn(() => {
         return datasourceParams;
     });
-    
-    test('load field', () => {
+
+    test('load field', done => {
         let field = React.createRef() as RefObject<Field>;
         let el = null;
+
         //*
         //tests: control not found, bind value without control
         let r = render(<Field id="cidViewContainer" ref={field} type="myControl" visible={false} />);
@@ -85,7 +115,7 @@ describe('test field', () => {
         r = render(<Field id="cidViewContainer" ref={field} type="myControl1" />);
         field.current.bindValue({
             f1: 'fval'
-        },false);
+        }, false);
         el = screen.getByText('Can not find control (component) "myControl1"');
         expect(el).toBeInstanceOf(HTMLDivElement);
         // tests: render control, bind value with no data field
@@ -93,7 +123,7 @@ describe('test field', () => {
         r = render(<Field id="cidViewContainer" ref={field} type="myControl" />);
         field.current.bindValue({
             f1: 'fval'
-        },false);
+        }, false);
         //el = screen.getByText('fval0');
         expect(field.current.control.current.state.value).toEqual(null);
 
@@ -104,54 +134,62 @@ describe('test field', () => {
         field.current.bindValue({
             f1: 'fval1',
             f2: 'fval2',
-            list:[{
+            list: [{
                 value: 'item001'
-            },{
+            }, {
                 value: 'item002'
             }]
-        },false);
+        }, false);
         el = screen.getByText('fval1');
         expect(el).toBeInstanceOf(HTMLDivElement);
         let lis = r.container.getElementsByTagName('li');
         expect(lis.length).toEqual(2);
         expect(lis[0].innerHTML).toEqual('item001');
-        expect(lis[1].innerHTML).toEqual('item002'); 
+        expect(lis[1].innerHTML).toEqual('item002');
 
         //tests: render control, no data source with api (no parameter), no bind value
         cleanup();
-        r = render(<Field id="cidViewContainer" type="myControl" dataField="f1" dataSourceApi='/fakeApiDs'/>);
+        r = render(<Field id="cidViewContainer" type="myControl" dataField="f1" dataSourceApi='/fakeApiDs' />);
         el = screen.getAllByText('no-item');
         expect(el[0]).toBeInstanceOf(HTMLLIElement);
         //*/
 
         //tests: render control, data source with api with api params, bind value
         cleanup();
-        r = render(<Field id="cidViewContainer" type="myControl" ref={field} dataField="f1" dataSourceApi='/fakeApiDs' dataApiParamsFunc={dataApiParamsFunc}  />);
-        
-        expect(dataApiParamsFunc).toBeCalled();
-        expect(realDatasourceParams).toEqual(datasourceParams);
         let doOne = false;
         callBackDidUpdated = function () {
             let lis = r.container.getElementsByTagName('li');
-            expect(lis.length).toEqual(2);
-            expect(lis[0].innerHTML).toEqual('val1');
-            expect(lis[1].innerHTML).toEqual('val2');
-            
-            if(!doOne){     
-                doOne = true;
-                field.current.bindValue({
-                    f1: 'fval7',
-                    f2: 'fval2'
-                },false);
-                
-                
+            try {
+                expect(lis.length).toEqual(2);
+                expect(lis[0].innerHTML).toEqual('val1');
+                expect(lis[1].innerHTML).toEqual('val2');
+
+                if (!doOne) {
+                    doOne = true;
+                    field.current.bindValue({
+                        f1: 'fval7',
+                        f2: 'fval2'
+                    }, false);
+
+
+                }
+                else {
+                    el = screen.getByText('fval7');
+                    expect(el).toBeInstanceOf(HTMLDivElement);
+                    done();
+                }
+            } catch (e) {
+                done(e);
             }
-            else{
-                el = screen.getByText('fval7');
-                expect(el).toBeInstanceOf(HTMLDivElement);
-            }
-        }
-        
-   
+
+
+        } as any;
+
+        r = render(<Field id="cidViewContainer2" type="myControl" ref={field} dataField="f1" dataSourceApi='/fakeApiDs' dataApiParamsFunc={dataApiParamsFunc} didUpdated={callBackDidUpdated} />);
+
+        expect(dataApiParamsFunc).toBeCalled();
+        expect(realDatasourceParams).toEqual(datasourceParams);
+
+
     });
 });

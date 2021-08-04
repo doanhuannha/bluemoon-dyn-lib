@@ -5,11 +5,11 @@ import { IComponentProps as IFieldProps, IComponentState, IField, AppContext } f
 import { execApiAsync, _debug } from './Utilities';
 
 
-export class Field extends React.Component<IFieldProps, IComponentState> implements IField {
+export class Field extends React.Component<IFieldProps & {[name:string]: any}, IComponentState> implements IField {
     static contextType = AppContext;
     public control: RefObject<BaseComponent>;
     private delayValue = null as any;
-    constructor(props: IFieldProps) {
+    constructor(props: IFieldProps & {[name:string]: any}) {
         super(props);
         this.control = React.createRef();
     }
@@ -19,7 +19,7 @@ export class Field extends React.Component<IFieldProps, IComponentState> impleme
         if (Control == null) {
             return <div>Can not find control (component) "{name}"</div>;
         }
-        else return <Control key={this.props.id} id={this.props.id} ref={this.control} {...this.props} />;
+        else return <Control key={this.props.id} ref={this.control} {...this.props} />;
     }
     public rebind(url: string = null, postData: any = undefined) { //bind data source for the component
         url = url || this.props.dataSourceApi;
@@ -30,7 +30,7 @@ export class Field extends React.Component<IFieldProps, IComponentState> impleme
                 else postData = window.utilities.merge(this.props.dataApiParamsFunc(this.control.current, url, this.context), postData);
             }
             execApiAsync(url, postData).then(response => response.json()).then(data => {
-                this.control.current?.setDataSource(data);
+                this.control.current.setDataSource(data);
                 if (this.delayValue) {
                     this.control.current?.setValue(this.delayValue.value, this.delayValue.isDefault);
                     this.delayValue = null;
@@ -38,6 +38,7 @@ export class Field extends React.Component<IFieldProps, IComponentState> impleme
             }).catch(error => {
                 _debug('error on request: ' + url);
                 _debug(error);
+                
             });
         }
     }

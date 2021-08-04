@@ -527,7 +527,7 @@ export const _debug = function (msg: any, persistent: boolean | number) {
     if (persistent === true) { }
     else {
         clearTimeout(_debug._debugPanel.timer);
-        _debug._debugPanel.timer = setTimeout(function (obj) {
+        _debug._debugPanel.timer = setTimeout(function (obj: HTMLElement) {
             obj.style.display = 'none';
             obj.innerHTML = '';
         }, persistent || 5000, _debug._debugPanel);
