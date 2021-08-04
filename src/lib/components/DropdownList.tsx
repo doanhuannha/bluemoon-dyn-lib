@@ -25,7 +25,7 @@ export default class DropdownList extends BaseComponent {
             }
         }
 
-        return <span {...this.props.options?.htmlProps}>
+        return <span id={this.state.readonly? this.props.id: null} {...this.props.options?.htmlProps}>
             {this.props.label ? (<label>{this.props.label}</label>) : null}
             {this.state.readonly ? <>{items[0]}</> :
                 <select id={this.props.id} value={this.getValue() || ''} disabled={!this.state.enable || this.state.readonly} onChange={(event) => this.onChangedHandler(event)}>

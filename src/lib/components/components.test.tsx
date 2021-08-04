@@ -80,28 +80,41 @@ describe('test components', () => {
 
     });
     test('test dropdownlist', () => {
-        let objRef = null as DropdownList;
-        const onDidMount = function (s: any) {
-            objRef = s;
-        }
-        const ds = [
-            { value: 'a1', text: 'Item 1' },
-            { value: 'a2', text: 'Item 2' },
-            { value: 'a3', text: 'Item 3' }
+        let objRef = React.createRef<DropdownList>();
+
+        let ds = [
+            { valueId: 'a1', text: 'Item 1' },
+            { valueId: 'a2', text: 'Item 2' },
+            { valueId: 'a3', text: 'Item 3' }
         ];
-        let r = render(<DropdownList id="cidDropdown" didMountFunction={onDidMount} label="drop_label" />);
-        let el = document.getElementById('cidDropdown');
+        let r = render(<DropdownList id="cidDropdown" label="drop_label" />);
+        let el = document.getElementById('cidDropdown') as HTMLSelectElement;
         expect(el.childElementCount).toEqual(0);
         expect(screen.getAllByText('drop_label')[0]).toBeInstanceOf(HTMLLabelElement);
         
         cleanup();
-        r = render(<DropdownList id="cidDropdown" didMountFunction={onDidMount} dataSource={ds} />);
-        el = document.getElementById('cidDropdown');
+        r = render(<DropdownList ref={objRef} id="cidDropdown" dataSource={ds} />);
+        el = document.getElementById('cidDropdown') as HTMLSelectElement;
         expect(el.tagName).toEqual('SELECT');
         (el as HTMLSelectElement).selectedIndex = 2;
         fireEvent.change(el);
-        expect(objRef.state.value).toEqual('a3');
+        expect(objRef.current.getValue()).toEqual('a3');
         expect(r.container.getElementsByTagName('label').length).toEqual(0);
+
+        
+        
+        
+        objRef.current.setReadonly(true);
+        el = document.getElementById('cidDropdown') as HTMLSelectElement;
+        expect(el.getElementsByTagName('span')[0].innerHTML).toEqual('Item 3');
+
+        cleanup();
+        const ds2 = [{txt: 'txt1', val: 'v1'},{txt: 'txt2', val: 'v2'}, {txt: 'txt3'}, {}];
+        r = render(<DropdownList ref={objRef} id="cidDropdown" dataSource={ds2} options={{htmlProps: {className:'drop-class'}, textField: 'txt', valueField: 'val'}} />);
+        objRef.current.setValue('v2');
+        el = document.getElementById('cidDropdown') as HTMLSelectElement;
+        expect(el.parentElement.className).toEqual('drop-class');
+        expect(el.value).toEqual('v2');
     });
     test('test hidden', () => {
         let r = render(<Hidden id="cidHidden" />);
@@ -181,9 +194,10 @@ describe('test components', () => {
         
         let tbConfig = null as TableConfig;
         tbConfig = {
-            headers:[
-                {label: 'Col 1', dataField: 'fd1'},
-                {label: 'Col 2', dataField: 'fd2'}
+            
+            columns:[
+                {headerLabel: 'Col 1', dataField: 'fd1'},
+                {headerLabel: 'Col 2', dataField: 'fd2'}
             ]
         };
         let objRef = null as Table;
@@ -204,12 +218,12 @@ describe('test components', () => {
 
         cleanup();
         tbConfig = {
-            headers:[
-                {label: 'Col 1', dataField: 'fd1'},
-                {label: 'Col 2', dataField: 'fd2'},
+            columns:[
+                {headerLabel: 'Col 1', dataField: 'fd1'},
+                {headerLabel: 'Col 2', dataField: 'fd2'},
                 {
-                    label: 'Col 3', dataField: null,
-                    buildTableItem: function(data:any){
+                    headerLabel: 'Col 3', dataField: null,
+                    buildItem: function(data:any){
                         return '<a href="view/' + data.fd1 + '">Edit</a>';
                     }
                 }
@@ -229,12 +243,12 @@ describe('test components', () => {
 
         cleanup();
         tbConfig = {
-            headers:[
-                {label: 'Col 1', dataField: 'fd1'},
-                {label: 'Col 2', dataField: 'fd2'},
+            columns:[
+                {headerLabel: 'Col 1', dataField: 'fd1'},
+                {headerLabel: 'Col 2', dataField: 'fd2'},
                 {
-                    label: 'Col 3', dataField: null,
-                    buildTableItem: function(data:any){
+                    headerLabel: 'Col 3', dataField: null,
+                    buildItem: function(data:any){
                         return <a href={"view/"+data.fd1}>Edit</a>;
                     }
                 }
@@ -250,11 +264,11 @@ describe('test components', () => {
 
         cleanup();
         tbConfig = {
-            headers:[
-                {label: 'Col 1', dataField: 'fd1'},
-                {label: 'Col 2', dataField: 'fd2'},
+            columns:[
+                {headerLabel: 'Col 1', dataField: 'fd1'},
+                {headerLabel: 'Col 2', dataField: 'fd2'},
                 {
-                    label: 'Col 3', dataField: null,
+                    headerLabel: 'Col 3', dataField: null,
                     component: 'mycomptable'
                 }
             ]
@@ -280,7 +294,7 @@ describe('test components', () => {
     });
     test('test checkboxlist',()=>{
         let refObj = React.createRef() as RefObject<CheckBoxList>;
-        let r = render(<CheckBoxList ref={refObj} id="cidCheckboxList" dataSource={[{text:'t001', value:'v001'}, {text:'t002', value:'v002'}]} />);
+        let r = render(<CheckBoxList ref={refObj} id="cidCheckboxList" dataSource={[{text:'t001', valueId:'v001'}, {text:'t002', valueId:'v002'}]} />);
         
         let el = document.getElementById('cidCheckboxList');
         expect(el).toBeInstanceOf(HTMLSpanElement);
@@ -295,35 +309,56 @@ describe('test components', () => {
         el.click();
         expect(refObj.current.getValue()).toEqual(['v002']);
 
-        r = render(<CheckBoxList ref={refObj} id="cidCheckboxList2" label="Checkbox list" />);
+        refObj.current.setReadonly(true);
+        el = document.getElementById('cidCheckboxList');
+        expect(el.getElementsByTagName('span')[0].innerHTML).toEqual('t002');
+        
+        //test with label, props and textfield, valuefield
+        const ds = [{txt: 'txt1', val: 'v1'},{txt: 'txt2', val: 'v2'}, {txt: 'txt3'}, {}];
+        r = render(<CheckBoxList ref={refObj} id="cidCheckboxList2" label="Checkbox list" options={{htmlProps: {className:'check-class'}, textField: 'txt', valueField: 'val'}} />);
         el = document.getElementById('cidCheckboxList2');
         expect(el).toBeInstanceOf(HTMLSpanElement);
+        expect(el.className).toEqual('check-class');
         expect(el.firstElementChild.innerHTML).toEqual('Checkbox list');
+        refObj.current.setDataSource(ds);
+        expect((document.getElementById('cidCheckboxList2_item0') as HTMLInputElement).value).toEqual('v1');
+        expect((document.getElementById('cidCheckboxList2_item2') as HTMLInputElement).value).toEqual('');
+        expect(document.querySelector('label[for=cidCheckboxList2_item2]').innerHTML).toEqual('txt3');
+
+        //
         //el.click();
         //expect(refObj.current.getValue()).toEqual(true);
     });
     test('test radio list',()=>{
         let refObj = React.createRef() as RefObject<RadioList>;
-        let r = render(<RadioList ref={refObj} id="cidRadioList" dataSource={[{text:'t001', value:'v001'}, {text:'t002', value:'v002'}]} />);
+        let r = render(<RadioList ref={refObj} id="cidRadioList" dataSource={[{text:'t001', valueId:'v001'}, {text:'t002', valueId:'v002'}, {text:'t003', valueId:'v003'}]} />);
         let el = document.getElementById('cidRadioList');
         expect(el).toBeInstanceOf(HTMLSpanElement);
         el = document.getElementById('cidRadioList_item1');
         el.click();
         expect((el as HTMLInputElement).checked).toEqual(true);
         expect(refObj.current.getValue()).toEqual('v002');
-        el = document.getElementById('cidRadioList_item0');
+        el = document.getElementById('cidRadioList_item2');
         el.click();
         expect((el as HTMLInputElement).checked).toEqual(true);
-        expect(refObj.current.getValue()).toEqual('v001');
-        el.click();
-        expect(refObj.current.getValue()).toEqual('v001');
+        expect(refObj.current.getValue()).toEqual('v003');
+        
+                
+        refObj.current.setReadonly(true);
+        el = document.getElementById('cidRadioList');
+        expect(el.getElementsByTagName('span')[0].innerHTML).toEqual('t003');
 
-        r = render(<RadioList ref={refObj} id="cidRadioList2" label="Radio list" />);
+        cleanup();
+        const ds2 = [{txt: 'txt1', val: 'v1'},{txt: 'txt2', val: 'v2'}, {txt: 'txt3'}, {}];
+        r = render(<RadioList ref={refObj} id="cidRadioList2" label="Radio list" options={{htmlProps: {className:'radio-class'}, textField: 'txt', valueField: 'val'}} />);
         el = document.getElementById('cidRadioList2');
         expect(el).toBeInstanceOf(HTMLSpanElement);
         expect(el.firstElementChild.innerHTML).toEqual('Radio list');
-        //el.click();
-        //expect(refObj.current.getValue()).toEqual(true);
+        expect(el.className).toEqual('radio-class');
+        refObj.current.setDataSource(ds2);
+        refObj.current.setValue('v2');
+        expect((document.getElementById('cidRadioList2_item0') as HTMLInputElement).checked).toEqual(false);
+        expect((document.getElementById('cidRadioList2_item1') as HTMLInputElement).checked).toEqual(true);
     });
 
     test('test textarea', () => {

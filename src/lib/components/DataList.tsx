@@ -54,10 +54,10 @@ export default class DataList extends BaseComponent {
                 dataComponents.push(<div key={itemKey}>{data[j]}</div>);
             }
         }
-        else if (config.noItem) {
+        else if (config?.noItem) {
             let DynCom = DataPool.allControls[config.noItem];
-            if (DynCom) dataComponents.push(<><DynCom key={this.props.id + 'no_data'} /></>);
-            else dataComponents.push(<HtmlTemplate options={{ html: config.noItem }}/>);
+            if (DynCom) dataComponents.push(<DynCom key={this.props.id + 'no_data'} />);
+            else dataComponents.push(<HtmlTemplate  key={this.props.id + 'no_data'} options={{ html: config.noItem }}/>);
 
         }
         else dataComponents.push(<div key={this.props.id + 'no_data'}>No data found</div>);

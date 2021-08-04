@@ -129,6 +129,9 @@ describe('test BaseComponent', () => {
         el = document.getElementById('cidBaseComponent');
         expect(objRef.getValue()).toEqual('Item 001');
         expect(el.getAttribute('data-value')).toEqual('Item 001');
+        expect(objRef.getDataSource()).toEqual(ds);
+        expect(objRef.getView()).toEqual(undefined);
+
     });
 
 });
