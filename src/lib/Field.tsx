@@ -32,7 +32,7 @@ export class Field extends React.Component<IFieldProps & {[name:string]: any}, I
             execApiAsync(url, postData).then(response => response.json()).then(data => {
                 this.control.current.setDataSource(data);
                 if (this.delayValue) {
-                    this.control.current?.setValue(this.delayValue.value, this.delayValue.isDefault);
+                    this.control.current.setValue(this.delayValue.value, this.delayValue.isDefault);
                     this.delayValue = null;
                 }
             }).catch(error => {
@@ -44,7 +44,7 @@ export class Field extends React.Component<IFieldProps & {[name:string]: any}, I
     }
     componentDidMount() {
         if (this.control.current == null) return;
-        if (this.control.current.state.dataSource == null) this.rebind();
+        if (this.control.current.getDataSource() == null) this.rebind();
     }
 
     public bindValue(val: any, isDefault: boolean): boolean {
