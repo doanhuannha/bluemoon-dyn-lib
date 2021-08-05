@@ -1,9 +1,5 @@
-import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
-
-import { DataStorage } from './DataStorage';
-import { execApiAsync } from './Utilities';
-
+import { execApiAsync } from './Utilities.execApi';
+import './Utilities'; 
 describe('test execApi', () => {
     class Response {
         private body: string;

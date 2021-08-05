@@ -3,7 +3,8 @@ import { DataPool } from './DataPool';
 import { ViewFieldDefine, ViewDefine, IViewProps, IViewState, IView, IComponent, AppContext, AppContextProvider, SubmitParamsFunction, IFieldItem, IComponentProps } from './Defs';
 import { DynConfig } from './DynConfig';
 import { Field } from './Field';
-import { execApiAsync, _debug } from './Utilities';
+import { _debug } from './Utilities.debug';
+import { execApiAsync } from './Utilities.execApi';
 
 
 export class View extends React.Component<IViewProps, IViewState> implements IView {

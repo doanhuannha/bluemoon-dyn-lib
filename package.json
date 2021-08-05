@@ -14,7 +14,7 @@
   "scripts": {
     "build": "rollup -c",
     "test": "jest --coverage --passWithNoTests --verbose --watchAll=false",
-    "test:partial": "jest --coverage --passWithNoTests --verbose --testPathPattern=src/lib/field"
+    "test:partial": "jest --coverage --passWithNoTests --verbose --testPathPattern=src/lib/Utilities.execApi.test"
   },
   "dependencies": {
     "@types/react": "16.9.4",

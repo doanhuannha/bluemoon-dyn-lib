@@ -2,14 +2,15 @@ import React, { RefObject } from 'react';
 import { BaseComponent } from './BaseComponent';
 import { DataPool } from './DataPool';
 import { IComponentProps as IFieldProps, IComponentState, IField, AppContext } from './Defs';
-import { execApiAsync, _debug } from './Utilities';
+import { _debug } from './Utilities.debug';
+import { execApiAsync } from './Utilities.execApi';
 
 
-export class Field extends React.Component<IFieldProps & {[name:string]: any}, IComponentState> implements IField {
+export class Field extends React.Component<IFieldProps & { [name: string]: any }, IComponentState> implements IField {
     static contextType = AppContext;
     public control: RefObject<BaseComponent>;
     private delayValue = null as any;
-    constructor(props: IFieldProps & {[name:string]: any}) {
+    constructor(props: IFieldProps & { [name: string]: any }) {
         super(props);
         this.control = React.createRef();
     }
@@ -22,6 +23,7 @@ export class Field extends React.Component<IFieldProps & {[name:string]: any}, I
         else return <Control key={this.props.id} ref={this.control} {...this.props} />;
     }
     public rebind(url: string = null, postData: any = undefined) { //bind data source for the component
+        if (this.control.current == null) return;
         url = url || this.props.dataSourceApi;
         if (url) {
 
@@ -38,7 +40,7 @@ export class Field extends React.Component<IFieldProps & {[name:string]: any}, I
             }).catch(error => {
                 _debug('error on request: ' + url);
                 _debug(error);
-                
+
             });
         }
     }

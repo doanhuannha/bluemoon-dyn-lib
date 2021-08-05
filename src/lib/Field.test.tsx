@@ -3,27 +3,12 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { BaseComponent } from './BaseComponent';
 import { DynConfig } from './DynConfig';
 import { Field } from './Field';
-/*
 import './Utilities'; 
-import { execApiAsync } from './Utilities';
-//let { execApiAsync } = require('./Utilities');
-execApiAsync = function(url: string, requestData: any, recalled?: boolean): Promise<Response> {
-    return new Promise<Response>((resolve, reject) => {
-        if (requestData == null) {
-            reject('No post data');
-            return;
-        }
 
-        const response = new Response('[{"value":"val1"}, {"value":"val2"}]');
-        resolve(response);
-
-    });
-}
-*/
 
 describe('test field', () => {
-    const ut = require('./Utilities');
-    ut.execApiAsync = function(url: string, requestData: any, recalled?: boolean): Promise<Response> {
+    const ut = require('./Utilities.execApi');
+    ut.execApiAsync = function (url: string, requestData: any, recalled?: boolean): Promise<Response> {
         return new Promise<Response>((resolve, reject) => {
             if (requestData == null) {
                 reject('No post data');
@@ -95,12 +80,11 @@ describe('test field', () => {
     const dataApiParamsFunc = jest.fn(() => {
         return datasourceParams;
     });
-
+    //*
     test('load field', () => {
         let field = React.createRef() as RefObject<Field>;
         let el = null;
 
-        //*
         //tests: control not found, bind value without control
         let r = render(<Field id="cidViewContainer" ref={field} type="myControl" visible={false} />);
         expect(r.container.innerHTML).toEqual('');
@@ -141,14 +125,13 @@ describe('test field', () => {
         expect(lis[0].innerHTML).toEqual('item001');
         expect(lis[1].innerHTML).toEqual('item002');
 
-       
-        //*/
+
         //tests: render control, no data source with api (no parameter), no bind value
         cleanup();
         r = render(<Field id="cidViewContainer" ref={field} type="myControl" dataField="f1" dataSourceApi='/fakeApiDs' />);
         el = screen.getAllByText('no-item');
         expect(el[0]).toBeInstanceOf(HTMLLIElement);
-        
+
         field.current.rebind('/fakeApiDs', null);
 
     });
@@ -156,11 +139,11 @@ describe('test field', () => {
         let field = React.createRef() as RefObject<Field>;
         let el = null;
 
-         
+
 
         let doOne = false;
         callBackDidUpdated = function () {
-            
+
             let lis = r.container.getElementsByTagName('li');
             try {
                 expect(lis.length).toEqual(2);
@@ -169,13 +152,6 @@ describe('test field', () => {
 
                 if (!doOne) {
                     doOne = true;
-                    /*
-                    field.current.bindValue({
-                        f1: 'fval7',
-                        f2: 'fval2'
-                    }, false);
-                    */
-
                 }
                 else {
                     el = screen.getByText('fval1');
@@ -201,11 +177,11 @@ describe('test field', () => {
         let field = React.createRef() as RefObject<Field>;
         let el = null;
 
-         
+
 
         let doOne = false;
         callBackDidUpdated = function () {
-            
+
             let lis = r.container.getElementsByTagName('li');
             try {
                 expect(lis.length).toEqual(2);
@@ -236,49 +212,33 @@ describe('test field', () => {
         expect(dataApiParamsFunc).toBeCalled();
         expect(realDatasourceParams).toEqual(datasourceParams);
     });
-    test('load field with api 3', done => {
-        let field = React.createRef() as RefObject<Field>;
-        let el = null;
-
-         
-
-        let doOne = false;
-        callBackDidUpdated = function () {
-            
-            let lis = r.container.getElementsByTagName('li');
-            try {
-                expect(lis.length).toEqual(2);
-                expect(lis[0].innerHTML).toEqual('val1');
-                expect(lis[1].innerHTML).toEqual('val2');
-
-                if (!doOne) {
-                    doOne = true;
-                    /*
-                    field.current.bindValue({
-                        f1: 'fval7',
-                        f2: 'fval2'
-                    }, false);
-                    */
-
-                }
-                else {
-                    el = screen.getByText('fval1');
-                    expect(el).toBeInstanceOf(HTMLDivElement);
-                    done();
-                }
-            } catch (e) {
-                done(e);
+    //*/
+    test('load field with api 3', () => {
+        var f = new Field({
+            type: 'myControl', dataField: 'f1', dataSourceApi: '/fakeApiDs', dataApiParamsFunc: function (s, u, c) {
+                return {};
             }
-
-
-        } as any;
-
-        let r = render(<Field id="cidViewContainer2" type="myControl" ref={field} dataField="f1" dataSourceApi='/fakeApiDs' dataApiParamsFunc={dataApiParamsFunc} didUpdated={callBackDidUpdated} />);
-        field.current.bindValue({
+        });
+        
+        f.rebind(null, {});
+        f.control = {
+            current: {
+                getDataSource: () => { return {a:true}; },
+                setValue: () => { }
+            } as any
+        };
+        f.componentDidMount();
+        f.rebind(null, {});
+        f.bindValue({
             f1: 'fval1',
-            f2: 'fval2'
+            f2: 'fval2',
+            list: [{
+                value: 'item001'
+            }, {
+                value: 'item002'
+            }]
         }, false);
-        expect(dataApiParamsFunc).toBeCalled();
-        expect(realDatasourceParams).toEqual(datasourceParams);
+
+
     });
 });
