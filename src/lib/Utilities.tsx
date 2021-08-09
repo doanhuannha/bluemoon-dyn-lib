@@ -120,6 +120,17 @@ window.utilities = {
     _isObject: function (item: any): boolean {
         return (item && typeof item === 'object' && !Array.isArray(item));
     },
+    _mergeVal: function (val1: any, val2: any): any {
+        if (Array.isArray(val1) && Array.isArray(val2)) {
+            if (val2[0]['_replace'] === true) {
+                val2.splice(0, 1);
+                return val2;
+            }
+            else return [...val1, ...val2];
+        }
+        else if (Array.isArray(val1)) return [...val1, val2];
+        else return val2;
+    },
     merge: function (target: any, ...sources: any[]): any {
         if (!target) target = {};
         if (!sources.length) return target;
@@ -130,10 +141,9 @@ window.utilities = {
                 if (this._isObject(source[key])) {
                     if (!target[key]) target[key] = {};
                     if (this._isObject(target[key])) this.merge(target[key], source[key]);
-                    else target[key] = source[key];
-                } else {
-                    target[key] = source[key];
+                    else target[key] = this._mergeVal(target[key], source[key]);
                 }
+                else target[key] = this._mergeVal(target[key], source[key]);
             }
         }
         return this.merge(target, ...sources);

@@ -91,7 +91,8 @@ export type FieldDefine = {
     options?: any,
     enable?: boolean,
     visible?: boolean,
-    valueChangedFunc?: ValueChangedFunction
+    valueChangedFunc?: ValueChangedFunction,
+    inherit?: string
 }
 
 export interface IComponentState {
@@ -133,7 +134,8 @@ export type ViewDefine = {
         } & { [name: string]: any }
     },
     dataField?: string,
-    options?: any
+    options?: any,
+    inherit?: string
 };
 export interface IViewItem {
     [key: string]: ViewDefine

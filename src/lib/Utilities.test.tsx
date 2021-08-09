@@ -323,13 +323,19 @@ describe('test window.utilities', () => {
             r = window.utilities.merge(r, { d: 1, b: { e: 3 } });
             expect(r).toEqual({ a: 1, b: { c: 2, e: 3 }, d: 1 });
         });
-        test('???', () => {
+        test('join objects key, keep sibling attributes', () => {
             let r = {};
-            r = window.utilities.merge(r, { a: 1, b: { c: 2 } });
+            r = window.utilities.merge(r, { a: 1, b: { c: 2, f: 'f' } });
             r = window.utilities.merge(r, { d: 1, b: { e: 3 } });
-            expect(r).toEqual({ a: 1, b: { c: 2, e: 3 }, d: 1 });
+            expect(r).toEqual({ a: 1, b: { c: 2, e: 3, f: 'f'}, d: 1 });
         });
-
+        test('join arrays', () => {
+            const v1 = { b: '1', c: { c1: '1', c2: '2', c3: ['aa', 'cc'] } };
+            const v2 = { a: 'b', b: 'c', c: { c1: { c11: '2' }, c3: [{c31:'31'}, 'bb'] } };
+            const v3 = { c: {  c3: 'dd' } };
+            let r = window.utilities.merge({}, v1, v2, v3);
+            expect(r).toEqual({ a: 'b', b: 'c', c: { c1: { c11: '2' }, c2: '2', c3: ['aa','cc', {c31:'31'}, 'bb', 'dd'] } });
+        });
 
     });
     describe('test loadComp', () => {

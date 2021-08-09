@@ -59,8 +59,15 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
             }, this);
         }
     }
+    private processViewInherit(viewDef: ViewDefine): ViewDefine {
+        if (viewDef.inherit && DataPool.allViews[viewDef.inherit]) {
+            viewDef = window.utilities.merge({}, this.processViewInherit(DataPool.allViews[viewDef.inherit]), viewDef);
+        }
+        return viewDef;
+    }
+    
     private initView(viewDef: ViewDefine) {
-        this.viewDef = viewDef;
+        this.viewDef = this.processViewInherit(viewDef);
         this.dataApi = this.viewDef.dataApi;
         this.dataApiParams = this.props.dataApiParams || this.viewDef.dataApiParamsFunc;
         this.submitApi = this.viewDef.submitApi;
@@ -256,6 +263,13 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
         }
         return execApiAsync(url, submitData);
     }
+    private processFieldInherit(fieldDef: IComponentProps): IComponentProps {
+        if (fieldDef.inherit && DataPool.allFields[fieldDef.inherit]) {
+            fieldDef = window.utilities.merge({}, this.processFieldInherit(DataPool.allFields[fieldDef.inherit]), fieldDef);
+        }
+        
+        return fieldDef;
+    }
     private buildFields(): any[] {
         const items = [];
         if (this.fields != null && this.fields.length > 0) {
@@ -266,10 +280,12 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
                     //_debug(DataPool.allFields[this.fields[i].name]);
                     //_debug('view redefined');
                     //_debug(this.fields[i]);
-
+                    //const fieldProps = this.processFieldInherit(DataPool.allFields[this.fields[i].name]) as IComponentProps;
                     const fieldProps = {} as IComponentProps;
+                    
+                    
                     //window.utilities.merge(DataPool.allFields[this.fields[i].name], this.fields[i]);
-                    window.utilities.merge(fieldProps, DataPool.allFields[this.fields[i].name], this.fields[i]);
+                    window.utilities.merge(fieldProps, this.processFieldInherit(DataPool.allFields[this.fields[i].name]), this.fields[i]);
                     //_debug('overwritten');
                     //_debug(fieldProps);
                     items.push(<Field ref={this.children[i]}
