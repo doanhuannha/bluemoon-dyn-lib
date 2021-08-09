@@ -141,7 +141,7 @@ execApiAsync.CachedPool = {
 };
 
 //toggleLoadingPanel.toggleCnt = 0;
-const toggleLoadingPanel = window.toggleLoadingPanel || function (visible: boolean) {
+export const toggleLoadingPanel = window.toggleLoadingPanel || function (visible: boolean) {
 
     let panel = toggleLoadingPanel.panel;
     if (!panel) {
@@ -194,6 +194,7 @@ const toggleLoadingPanel = window.toggleLoadingPanel || function (visible: boole
 
     }
     if (panel.shownCnt > 0) panel.shownCnt += visible ? 0 : -1;
+    
     //_debug('from lib loading..' + visible + ', show count:' + panel.shownCnt +' at ' + new Date().getTime());
     if (panel.shownCnt === 0) {
         panel.spin.style.display = panel.style.display = visible ? 'inline-block' : 'none';
