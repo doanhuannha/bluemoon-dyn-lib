@@ -22,7 +22,7 @@ describe('test layouts', () => {
        let divs = r.container.getElementsByTagName('div');
        
        expect(divs.length).toEqual(8);
-       expect(divs[0].className).toEqual('c1');
+       expect(divs[0].className).toEqual('flow c1');
        expect(divs[0].innerHTML).toEqual('<span>item 1</span>');
        expect(divs[6].innerHTML).toEqual('<span>item 7</span>');
    });

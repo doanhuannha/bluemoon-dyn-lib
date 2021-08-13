@@ -5,6 +5,7 @@ import { DynConfig } from './DynConfig';
 import './Utilities.tsx';
 import { View } from './View';
 import { FlowLayout } from './Layouts';
+import { IViewProps, IViewState, IComponentProps, IComponentState } from './Defs';
 describe('test view', () => {
     window.alert = jest.fn();
     window.utilities.loadJs = function (url: string, callback: (arg: any) => void, cArg: any) {
@@ -23,7 +24,79 @@ describe('test view', () => {
         });
 
 
-    }
+    };
+    class Response {
+        private body: any;
+        public ok: boolean;
+        public status: number;
+
+        constructor(body?: BodyInit, init?: ResponseInit) {
+            this.body = body;
+            this.ok = true;
+            this.status = 200;
+        }
+
+        json() {
+            return new Promise<any>(r => {
+                r(JSON.parse(this.body));
+            });
+        }
+        text() {
+            return new Promise<string>(r => {
+                r(this.body);
+            });
+        }
+    };
+    
+    global.Response = Response as any;
+    
+    
+    
+    
+    
+    
+    
+    const ut = require('./Utilities.execApi');
+    
+    ut.execApiAsync = function (url: string, postData: any, recalled?: boolean): Promise<Response> {
+        let result = '';
+        if (url.startsWith('/fakeTpl_error')) {
+            postData = {
+                shouldRaiseEror: true
+            }
+        }
+        else if (url.startsWith('/fakeData_null')) {
+            result = 'null';
+        }
+
+        else if (url.startsWith('/fakeTpl')) {
+            result = '<div class="url-template"><div field-name="fieldA"></div><div field-name="fieldBA">fieldBA</div></div>';
+        }
+        else if (url.startsWith('/fakeData1')) {
+            result = '{"df":{"f1":"vvv01","f2":"vvv02"}}';
+        }
+        else if (url.startsWith('/fakeData')) {
+            result = '{"f1":"vvv01","f2":"vvv02"}';
+        }
+        else if (url.startsWith('/submitData')) {
+            if (onSubmitHandler) onSubmitHandler();
+            result = 'true';
+        }
+        return new Promise<Response>((resolve, reject) => {
+            if (postData?.shouldRaiseEror) reject('Invalid request');
+            else {
+                const response = new Response(result);
+                resolve(response);
+            }
+
+
+        });
+    };
+    const ut1 = require('./Utilities.debug');
+    let msg = null as any;
+    ut1._debug = jest.fn((s: any) => {
+        msg = s;
+    });
     class MyComp extends BaseComponent {
         protected renderComponent(): React.ReactNode {
             return (<>
@@ -88,7 +161,13 @@ describe('test view', () => {
             {
                 name: 'fieldB'
             }],
-            templateUrl: '/fakeTpl',
+            layout:{
+                name: 'htmllayout',
+                options: {
+                    templateUrl: '/fakeTpl'
+                }
+            },
+            
             dataApi: '/fakeData',
             submitApi: '/submitData'
         },
@@ -121,7 +200,13 @@ describe('test view', () => {
             {
                 name: 'fieldB'
             }],
-            templateUrl: '/fakeTpl_error'
+            layout:{
+                name: 'htmllayout',
+                options: {
+                    templateUrl: '/fakeTpl_error'
+                }
+            }
+            
         },
         viewL: {
             fields: [{
@@ -159,62 +244,8 @@ describe('test view', () => {
 
         },
     });
-    class Response {
-        private body: string;
-        constructor(s: string) {
-            this.body = s;
-        }
-        text() {
-            return new Promise<any>((r) => {
-                (r(this.body))
-            });
-        }
-        json() {
-            return new Promise<any>((r) => {
-                (r(JSON.parse(this.body)))
-            });
-        }
-    };
     let onSubmitHandler = null as () => void;
-    global.fetch = (input: RequestInfo, init?: RequestInit): Promise<any> => {
-        const url = input as string;
-        let result = '';
-        let postData = null as any;
-        postData = init?.body || '{}';
-        postData = JSON.parse(postData as string);
-        if (url.startsWith('/fakeTpl_error')) {
-            postData = {
-                shouldRaiseEror: true
-            }
-        }
-        else if (url.startsWith('/fakeData_null')) {
-            result = 'null';
-        }
-
-        else if (url.startsWith('/fakeTpl')) {
-            result = '<div class="url-template"><div field-name="fieldA"></div><div field-name="fieldBA">fieldBA</div></div>';
-        }
-        else if (url.startsWith('/fakeData1')) {
-            result = '{"df":{"f1":"vvv01","f2":"vvv02"}}';
-        }
-        else if (url.startsWith('/fakeData')) {
-            result = '{"f1":"vvv01","f2":"vvv02"}';
-        }
-        else if (url.startsWith('/submitData')) {
-            if (onSubmitHandler) onSubmitHandler();
-            result = 'true';
-        }
-
-        return new Promise<Response>((resolve, reject) => {
-            if (postData?.shouldRaiseEror) reject('Invalid request');
-            else {
-                const response = new Response(result);
-                resolve(response);
-            }
-
-
-        });
-    };
+    
     test('load invalid view', done => {
         let el = null as HTMLElement;
         //render invalid view, then request the view succesfully
@@ -308,8 +339,9 @@ describe('test view', () => {
         expect(screen.getByText('val01')).toBeInstanceOf(HTMLSpanElement);
     });
     test('load view with inline template, data api', done => {
-        const dataBound = (s: View) => {
+        const dataBound = (sender: React.Component<IViewProps, IViewState>, fields: React.Component<IComponentProps, IComponentState>[]) => {
             try {
+                const s  = sender as View;
                 expect(screen.getByText('vvv01')).toBeInstanceOf(HTMLSpanElement);
                 expect(s.getValues()).toEqual({ f1: 'vvv01', f2: 'vvv02' });
                 expect(s.isValidData()).toEqual(true);
@@ -365,8 +397,9 @@ describe('test view', () => {
     test('load view with template url, api data', done => {
 
         let rebindData = false;
-        const dataBound = (s: View) => {
+        const dataBound = (sender: React.Component<IViewProps, IViewState>, fields: React.Component<IComponentProps, IComponentState>[]) => {
             try {
+                const s = sender as View;
                 if (rebindData) {
                     expect(screen.getByText('vvv01-newval')).toBeInstanceOf(HTMLSpanElement);
                     done();
@@ -375,7 +408,7 @@ describe('test view', () => {
                     onSubmitHandler = jest.fn();
                     expect(screen.getByText('vvv01')).toBeInstanceOf(HTMLSpanElement);
                     expect(screen.getByText('fieldBA')).toBeInstanceOf(HTMLDivElement);
-                    const fA = s.find('fieldA');
+                    const fA = s.find('fieldA') as BaseComponent;
                     expect(fA).toBeInstanceOf(BaseComponent);
                     expect(s.find('fieldB')).toEqual(null);
                     fA.setValue('vvv0A');
@@ -404,76 +437,7 @@ describe('test view', () => {
 
     });
 
-    test('load view with inline template, data api error', done => {
-        const orgLog = console.log;
-        let msg = null as any;
-        const mocklog = jest.fn((s: any) => {
-            msg = s;
-        });
-        console.log = mocklog;
-        let r = render(<View id="cidViewContainer" name="viewZ" dataApiParams={{ shouldRaiseEror: true }} >
-            <div field-name="fieldA"></div>
-        </View>);
-        window.utilities.waitFor(() => mocklog.mock.calls.length > 0, () => {
-            try {
-                expect(msg).toEqual('Invalid request');
-                console.log = orgLog;
-                done();
-
-            } catch (error) {
-                console.log = orgLog;
-                done(error);
-            }
-        });
-
-        //expect(console.log).toBeCalledTimes(1);
-
-    });
-
-    test('load view with template url with error', done => {
-        const orgLog = console.log;
-        let msg = null as any;
-        const mocklog = jest.fn((s: any) => {
-            msg = s;
-        });
-        console.log = mocklog;
-
-        render(<View id="cidViewContainer" name="viewTT" />);
-        window.utilities.waitFor(() => mocklog.mock.calls.length > 0, () => {
-            try {
-                expect(msg).toEqual('Invalid request');
-                console.log = orgLog;
-                done();
-
-            } catch (error) {
-                console.log = orgLog;
-                done(error);
-            }
-        });
-
-
-
-    });
-    test('load view with data api return null', done => {
-        const orgLog = console.log;
-        let msg = null as any;
-        const mocklog = jest.fn((s: any) => {
-            msg = s;
-        });
-        console.log = mocklog;
-        let r = render(<View id="cidViewContainer" name="viewZZ" />);
-        window.utilities.waitFor(() => mocklog.mock.calls.length > 0, () => {
-            try {
-                expect(msg).toEqual('dataApi return null');
-                console.log = orgLog;
-                done();
-
-            } catch (error) {
-                console.log = orgLog;
-                done(error);
-            }
-        });
-    });
+    
     test('load view with layout', () => {
         let r = render(<View id="cidViewContainer" name="viewL" />);
         expect(r.container.getElementsByClassName('cc1').length).toEqual(2);
@@ -502,8 +466,9 @@ describe('test view', () => {
     });
 
     test('load view with datafield, data api', done => {
-        const dataBound = (s: View) => {
+        const dataBound = (sender: React.Component<IViewProps, IViewState>, fields: React.Component<IComponentProps, IComponentState>[]) => {
             try {
+                const s = sender as View;
                 expect(screen.getByText('vvv01')).toBeInstanceOf(HTMLSpanElement);
                 expect(s.getValues()).toEqual({ df: { f1: 'vvv01', f2: 'vvv02' } });
                 expect(s.isValidData()).toEqual(true);
@@ -516,7 +481,7 @@ describe('test view', () => {
 
 
     });
-    //*
+    
     test('load view with datafield, data source', () => {
         
         const ds = {
@@ -531,5 +496,55 @@ describe('test view', () => {
         expect(s.current.getValues()).toEqual({ df2: { f1: 'abcd01', f2: 'poiuy02' } });
 
     });
-    //*/
+    
+    test('load view with inline template, data api error', done => {
+        const cnt = ut1._debug.mock.calls.length;
+        let r = render(<View id="cidViewContainer" name="viewZ" dataApiParams={{ shouldRaiseEror: true }} >
+            <div field-name="fieldA"></div>
+        </View>);
+        
+        window.utilities.waitFor(() => ut1._debug.mock.calls.length > cnt, () => {
+            try {
+                expect(msg).toEqual('Invalid request');
+                done();
+
+            } catch (error) {
+                done(error);
+            }
+        });
+
+    });
+    
+    test('load view with template url with error', done => {
+        const cnt = ut1._debug.mock.calls.length;
+
+        render(<View id="cidViewContainer" name="viewTT" />);
+        window.utilities.waitFor(() => ut1._debug.mock.calls.length > cnt, () => {
+            try {
+                expect(msg).toEqual('Invalid request');
+                done();
+
+            } catch (error) {
+                done(error);
+            }
+        });
+
+
+
+    });
+
+    test('load view with data api return null', done => {
+        const cnt = ut1._debug.mock.calls.length;
+        let r = render(<View id="cidViewContainer" name="viewZZ" />);
+        window.utilities.waitFor(() => ut1._debug.mock.calls.length > cnt, () => {
+            try {
+                expect(msg).toEqual('dataApi return null: /fakeData_null');
+                done();
+
+            } catch (error) {
+                done(error);
+            }
+        });
+        
+    });
 });

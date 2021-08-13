@@ -47,21 +47,21 @@ describe('test window.validator', () => {
         test('test min val', () => {
             let msg = 'Min value is 5';
             let rule = 'min';
-            let r = window.validator.registeredRules[rule]('5', null, { msg, min: 5 });
+            let r = window.validator.registeredRules[rule]('5', null, { msg, minValue: 5 });
             expect(r).toEqual(null);
-            r = window.validator.registeredRules[rule]('4', null, { msg, min: 5 });
+            r = window.validator.registeredRules[rule]('4', null, { msg, minValue: 5 });
             expect(r).toEqual(msg);
-            r = window.validator.registeredRules[rule]('', null, { msg, min: 5 });
+            r = window.validator.registeredRules[rule]('', null, { msg, minValue: 5 });
             expect(r).toEqual(null);
         });
         test('test max val', () => {
             let msg = 'Max value is 5';
             let rule = 'max';
-            let r = window.validator.registeredRules[rule]('5', null, { msg, max: 5 });
+            let r = window.validator.registeredRules[rule]('5', null, { msg, maxValue: 5 });
             expect(r).toEqual(null);
-            r = window.validator.registeredRules[rule]('6', null, { msg, max: 5 });
+            r = window.validator.registeredRules[rule]('6', null, { msg, maxValue: 5 });
             expect(r).toEqual(msg);
-            r = window.validator.registeredRules[rule]('', null, { msg, max: 5 });
+            r = window.validator.registeredRules[rule]('', null, { msg, maxValue: 5 });
             expect(r).toEqual(null);
         });
 

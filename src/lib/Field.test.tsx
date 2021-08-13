@@ -7,19 +7,7 @@ import './Utilities';
 
 
 describe('test field', () => {
-    const ut = require('./Utilities.execApi');
-    ut.execApiAsync = function (url: string, requestData: any, recalled?: boolean): Promise<Response> {
-        return new Promise<Response>((resolve, reject) => {
-            if (requestData == null) {
-                reject('No post data');
-                return;
-            }
-            realDatasourceParams = requestData;
-            const response = new Response('[{"value":"val1"}, {"value":"val2"}]');
-            resolve(response);
-
-        });
-    };
+    
     class Response {
         private body: any;
         public ok: boolean;
@@ -43,11 +31,25 @@ describe('test field', () => {
         }
     };
     global.Response = Response as any;
+    let realDatasourceParams = null as any;
+    const ut = require('./Utilities.execApi');
+    ut.execApiAsync = function (url: string, requestData: any, recalled?: boolean): Promise<Response> {
+        return new Promise<Response>((resolve, reject) => {
+            if (requestData == null) {
+                reject('No post data');
+                return;
+            }
+            realDatasourceParams = requestData;
+            const response = new Response('[{"value":"val1"}, {"value":"val2"}]');
+            resolve(response);
+
+        });
+    };
     const datasourceParams = {
         r1: 'vr1',
         r2: 'vr2'
     };
-    let realDatasourceParams = null as any;
+    
     let callBackDidUpdated = null as any;
     class MyComp extends BaseComponent {
         public componentDidUpdate() {

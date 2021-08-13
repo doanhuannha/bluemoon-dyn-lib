@@ -355,6 +355,17 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
         }
         else {
             this.templateLayout.status = 'loading';
+            execApiAsync(window.utilities.resolveUrl(this.templateLayout.template), null, false)
+                .then(response => response.text())
+                .then(text => {
+                    this.templateLayout.html = text;
+                    this.templateLayout.status = 'loaded';
+                    this.forceUpdate();
+                }).catch(error => {
+                    _debug('error on request:' + this.templateLayout.template);
+                    _debug(error);
+                });
+            /*
             fetch(window.utilities.resolveUrl(this.templateLayout.template))
                 .then(response => response.text())
                 .then(text => {
@@ -365,6 +376,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
                     _debug('error on request:' + this.templateLayout.template);
                     _debug(error);
                 });
+            */
         }
 
     }

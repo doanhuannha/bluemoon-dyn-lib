@@ -27,13 +27,13 @@ describe('test execApi', () => {
     };
     global.Response = Response as any;
     global.fetch = (url: RequestInfo, init?: RequestInit): Promise<any> => {
-        if(url=='/fakeUrlFailed'){
+        if(url.toString().startsWith('/fakeUrlFailed')){
             return new Promise<Response>((resolve, reject) => {
                 const data  = {};
                 const response = new Response(JSON.stringify(data));
                 response.ok = false;
                 response.status = 403;
-                resolve(response);
+                reject(response);
             });
         }
         else{
@@ -43,7 +43,7 @@ describe('test execApi', () => {
                 hh[k] = v;
             });
             return new Promise<Response>((resolve, reject) => {
-                const data  = {...init,...{headers:hh}, data: input};
+                const data  = {...init,...{headers:hh}};
                 const response = new Response(JSON.stringify(data));
                 resolve(response);
             });
@@ -172,7 +172,6 @@ describe('test execApi', () => {
     });
     test('test execApi GET, faied', done => {
         let r = execApiAsync('/fakeUrlFailed', null).catch(e=>{
-            console.log(e);
             done();
         })
         
