@@ -32,7 +32,7 @@ export default class Table extends BaseComponent {
         else {
             const ds = val as { data: any[], pageSize: number, pageIndex: number, totalRow: number };
             data = ds.data;
-            paging = ds;
+            if (data) paging = ds;
         }
 
         //const data = this.state.value as any[];
@@ -53,7 +53,7 @@ export default class Table extends BaseComponent {
                     if (typeof (item) === 'string') td.push(<td key={this.props.id + 'd' + j + '_' + i} dangerouslySetInnerHTML={{ __html: item }}></td>);
                     else td.push(<td key={this.props.id + 'd' + j + '_' + i}>{item}</td>);
                 }
-                else if (config.columns[i].htmlItem){
+                else if (config.columns[i].htmlItem) {
                     td.push(<td key={this.props.id + 'd' + j + '_' + i} dangerouslySetInnerHTML={{ __html: config.columns[i].htmlItem }}></td>);
                 }
                 else {
@@ -65,10 +65,10 @@ export default class Table extends BaseComponent {
         }
         else if (config.noItem) {
             let DynCom = DataPool.allControls[config.noItem];
-            if(DynCom) dataComponents.push(<tr><td><DynCom /></td></tr>);
-            else dataComponents.push(<tr><td><span dangerouslySetInnerHTML={{ __html: config.noItem }}></span></td></tr>);
+            if (DynCom) dataComponents.push(<tr key={this.props.id + 'no_data'}><td><DynCom /></td></tr>);
+            else dataComponents.push(<tr key={this.props.id + 'no_data'}><td><span dangerouslySetInnerHTML={{ __html: config.noItem }}></span></td></tr>);
         }
-        else dataComponents.push(<tr><td colSpan={config.columns.length}>No data to be displayed</td></tr>);
+        else dataComponents.push(<tr key={this.props.id + 'no_data'}><td colSpan={config.columns.length}>No data to be displayed</td></tr>);
 
         return (<>
             <table id={this.props.id}  {...this.props.options?.htmlProps}>

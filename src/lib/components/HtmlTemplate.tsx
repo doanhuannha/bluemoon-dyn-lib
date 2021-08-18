@@ -5,7 +5,7 @@ import {BaseComponent} from '../BaseComponent';
 
 export default class HtmlTemplate extends BaseComponent{
 
-    private bindData = function(s: string, data: any) {
+    private bindData(s: string, data: any): string {
         if(data){
             s = s.replace(/{(\w+)}/ig, (m: any, g: any)=>{
                 if(g==='children') return data[g];

@@ -165,6 +165,14 @@ describe('test components', () => {
 
         objRef.setReadonly(true);
         expect(document.getElementById('cidTextbox')).toEqual(null);
+
+        cleanup();
+        r = render(<TextBox id="cidTextbox" didMountFunction={onDidMount} options={{textType:'date'}}/>);
+        const ctrl = document.getElementById('cidTextbox') as HTMLInputElement;
+        objRef.setValue('2020-07-24T23:45:16');
+        expect(ctrl.value).toEqual('2020-07-24');
+        objRef.setValue(new Date(2021,11,12));
+        expect(ctrl.value).toEqual('2021-12-12');
     });
     
     test('test ViewLoader', () => {
@@ -281,6 +289,18 @@ describe('test components', () => {
         el = document.getElementById('cidTable');
         expect(el).toBeInstanceOf(HTMLTableElement);
 
+        objRef.setValue({
+            data:[{fd1:'val 1.1', fd2:'val 1.2'},{fd1:'val 2.1', fd2:'val 2.2'}],
+            pageSize: 11, pageIndex: 3, totalRow: 123
+        });
+        el = document.getElementById('cidTable');
+        expect(el).toBeInstanceOf(HTMLTableElement);
+        el = document.getElementsByClassName('current')[0] as HTMLElement;
+        expect(el).toBeInstanceOf(HTMLAnchorElement);
+        expect(el.getAttribute('href')).toEqual('#gotoPage:3');
+
+        objRef.setValue({});
+        screen.debug();
 
     });
     
@@ -367,7 +387,7 @@ describe('test components', () => {
             objRef = s;
         } 
         let r = render(<TextArea id="cidTextArea" didMountFunction={onDidMount} label="textarea_label"/>);
-        let el = document.getElementById('cidTextArea') as HTMLInputElement;
+        let el = document.getElementById('cidTextArea') as HTMLTextAreaElement;
         expect(el.tagName).toEqual('TEXTAREA');
         //objRef.setValue('labelVal');
         fireEvent.change(el,{target:{value:'labelVal'}});
@@ -378,7 +398,14 @@ describe('test components', () => {
         expect(r.container.getElementsByTagName('label').length).toEqual(0);
 
         objRef.setReadonly(true);
-        expect(document.getElementById('cidTextArea')).toEqual(null);
+        el = document.getElementById('cidTextArea') as HTMLTextAreaElement;
+        expect(el).toEqual(null);
+        objRef.setReadonly(false);
+        objRef.setValue({msg: 'Hello'});
+        el = document.getElementById('cidTextArea') as HTMLTextAreaElement;
+        expect(JSON.parse(el.value)).toEqual({msg: 'Hello'});
+
+
     });
 });
 

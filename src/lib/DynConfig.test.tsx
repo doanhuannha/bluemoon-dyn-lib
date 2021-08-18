@@ -5,6 +5,7 @@ import { DataPool } from './DataPool';
 
 describe('test DynConfig',()=>{
     test('test exportLayouts', () => {
+        DataPool.allLayouts = null;
         function MyLayoutTestExport() {
             return <div></div>;
         }
@@ -19,6 +20,7 @@ describe('test DynConfig',()=>{
     
     });
     test('test exportControls', () => {
+        DataPool.allControls = null;
         function MyControlTestExport() {
             return <div></div>;
         }
@@ -34,6 +36,7 @@ describe('test DynConfig',()=>{
     });
     
     test('test exportPages', () => {
+        DataPool.allPages = null;
         function MyPageTestExport() {
             return <div></div>;
         }
