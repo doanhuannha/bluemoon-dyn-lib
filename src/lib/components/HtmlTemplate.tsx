@@ -5,7 +5,7 @@ import {BaseComponent} from '../BaseComponent';
 
 export default class HtmlTemplate extends BaseComponent{
 
-    private bindData(s: string, data: any): string {
+    public static bindData(s: string, data: any): string {
         if(data){
             s = s.replace(/{(\w+)}/ig, (m: any, g: any)=>{
                 if(g==='children') return data[g];
@@ -33,7 +33,7 @@ export default class HtmlTemplate extends BaseComponent{
         if(divCont){
             const data = this.state.value || this.props.value;
             
-            const html = this.bindData(this.props.options.html, data);
+            const html = HtmlTemplate.bindData(this.props.options.html, data);
             divCont.insertAdjacentHTML('afterbegin', html);
             
             const pp = divCont.parentElement;

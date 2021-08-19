@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react'
 import { BaseComponent } from '../BaseComponent';
 import { DataPool } from '../DataPool';
 import { Pager } from './Pager';
+import HtmlTemplate from './HtmlTemplate';
 export interface TableConfig {
     columns: {
         headerLabel: string,
@@ -19,9 +20,10 @@ export interface TableConfig {
 }
 export default class Table extends BaseComponent {
     renderComponent(): ReactNode {
-        if (this.state.value == null) return null;
-        const val = this.state.value;
-        let config = window.utilities.merge(this.props.options, val.options) as TableConfig;
+        if (this.props.options == null) return null;
+        const val = this.state.value || {};
+        const config = this.props.options as TableConfig;
+        window.utilities.merge(config, val.options);
 
 
         let data = null as any[];
@@ -54,7 +56,7 @@ export default class Table extends BaseComponent {
                     else td.push(<td key={this.props.id + 'd' + j + '_' + i}>{item}</td>);
                 }
                 else if (config.columns[i].htmlItem) {
-                    td.push(<td key={this.props.id + 'd' + j + '_' + i} dangerouslySetInnerHTML={{ __html: config.columns[i].htmlItem }}></td>);
+                    td.push(<td key={this.props.id + 'd' + j + '_' + i} dangerouslySetInnerHTML={{ __html: HtmlTemplate.bindData(config.columns[i].htmlItem, data[j]) }}></td>);
                 }
                 else {
                     td.push(<td key={this.props.id + 'd' + j + '_' + i}>{data[j][config.columns[i].dataField]}</td>);
@@ -65,13 +67,13 @@ export default class Table extends BaseComponent {
         }
         else if (config.noItem) {
             let DynCom = DataPool.allControls[config.noItem];
-            if (DynCom) dataComponents.push(<tr key={this.props.id + 'no_data'}><td><DynCom /></td></tr>);
-            else dataComponents.push(<tr key={this.props.id + 'no_data'}><td><span dangerouslySetInnerHTML={{ __html: config.noItem }}></span></td></tr>);
+            if (DynCom) dataComponents.push(<tr key={this.props.id + 'no_data'}><td colSpan={config.columns.length}><DynCom /></td></tr>);
+            else dataComponents.push(<tr key={this.props.id + 'no_data'}><td colSpan={config.columns.length} dangerouslySetInnerHTML={{ __html: config.noItem }}></td></tr>);
         }
         else dataComponents.push(<tr key={this.props.id + 'no_data'}><td colSpan={config.columns.length}>No data to be displayed</td></tr>);
 
         return (<>
-            <table id={this.props.id}  {...this.props.options?.htmlProps}>
+            <table id={this.props.id}  {...config.htmlProps}>
                 <thead>
                     <tr>{headerComponents}</tr>
                 </thead>
@@ -79,7 +81,7 @@ export default class Table extends BaseComponent {
                     {dataComponents}
                 </tbody>
             </table>
-            {paging ? <Pager pageIndex={paging.pageIndex} pageSize={paging.pageSize} totalRow={paging.totalRow} pagingHandler={config?.pagingHandler} parent={this} /> : null}
+            {paging ? <Pager pageIndex={paging.pageIndex} pageSize={paging.pageSize} totalRow={paging.totalRow} pagingHandler={config.pagingHandler} parent={this} /> : null}
         </>);
     }
 

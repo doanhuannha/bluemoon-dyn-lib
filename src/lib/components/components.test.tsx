@@ -14,6 +14,7 @@ import CheckBox from './CheckBox';
 import CheckBoxList from './CheckBoxList';
 import RadioList from './RadioList';
 import TextArea from './TextArea';
+import { Pager } from './Pager';
 
 
 describe('test components', () => {
@@ -25,11 +26,15 @@ describe('test components', () => {
 
     }
     const MyCompTable = function(p: any){
-        return <button value={p.data.f1}>{p.data.f2}</button>;
+        return <button id={'btn'+p.data.fd1}>{p.data.fd2}</button>;
+    }
+    const MyCompTable_NoItem = function(){
+        return <>Item list is empty</>;
     }
     DynConfig.exportControls({
         'mycompviewloader': MyCompViewLoader,
-        'mycomptable': MyCompTable
+        'mycomptable': MyCompTable,
+        'mycomptable_noitem': MyCompTable_NoItem
     });
     window.utilities.importFieldDefs({
         fieldAA: {
@@ -56,6 +61,38 @@ describe('test components', () => {
             }]
         }
     });
+    test('test pager', () => {
+        const pagingHandler = jest.fn((sender, pageIndex, pageSize) =>  {
+
+        });
+        const parent = {} as any;
+        let r = render(<Pager pageIndex={1} pageSize={7} totalRow={36} pagingHandler={pagingHandler} parent={parent} /> );
+        let el = document.querySelector('a[href="#gotoPage:1"]');
+        expect(el.className).toEqual('current');
+        fireEvent.click(el);
+        fireEvent.click(document.querySelector('a[href="#gotoPage:2"]'));
+        expect(pagingHandler).toBeCalledTimes(1);
+
+        fireEvent.click(document.querySelector('a[href="#gotoPage:3"]'));
+        expect(pagingHandler).toBeCalledTimes(2);
+
+        screen.debug();
+
+        /*
+        cleanup();
+        r = render(<Pager pageIndex={1} pageSize={7} totalRow={35} pagingHandler={pagingHandler} parent={parent} pageListCount={3}/> );
+        screen.debug();
+
+        cleanup();
+        r = render(<Pager pageIndex={3} pageSize={7} totalRow={35} pagingHandler={pagingHandler} parent={parent} pageListCount={3}/> );
+        screen.debug();
+
+        cleanup();
+        r = render(<Pager pageIndex={6} pageSize={7} totalRow={35} pagingHandler={pagingHandler} parent={parent} pageListCount={3}/> );
+        screen.debug();
+        */
+    });
+    return;
     test('test button', () => {
         let objRef = null as Button;
         const onDidMount = function (s: any) {
@@ -208,15 +245,23 @@ describe('test components', () => {
                 {headerLabel: 'Col 2', dataField: 'fd2'}
             ]
         };
+
         let objRef = null as Table;
         const onDidMount = function (s: any) {
             objRef = s;
         } 
-        let r = render(<Table id="cidTable" didMountFunction={onDidMount} options={tbConfig}/> );
+        let r = render(<Table id="cidTable" didMountFunction={onDidMount}/> );
         expect(r.container.innerHTML).toEqual('');
+        cleanup();
+        r = render(<Table id="cidTable" didMountFunction={onDidMount} options={tbConfig}/> );
+        let el = document.getElementsByTagName('td')[0] as HTMLElement;
+        expect(el.getAttribute('colspan')).toEqual('2');
+        expect(el.innerHTML).toEqual('No data to be displayed');
+
+        //expect(r.container.innerHTML).toEqual('');
 
         objRef.setValue([{fd1:'val 1.1', fd2:'val 1.2'},{fd1:'val 2.1', fd2:'val 2.2'}]);
-        let el = document.getElementById('cidTable');
+        el = document.getElementById('cidTable');
         expect(el).toBeInstanceOf(HTMLTableElement);
 
         expect(el.getElementsByTagName('tr').length).toEqual(3);
@@ -232,22 +277,48 @@ describe('test components', () => {
                 {
                     headerLabel: 'Col 3', dataField: null,
                     buildItem: function(data:any){
-                        return '<a href="view/' + data.fd1 + '">Edit</a>';
+                        return '<a id="lnk' + data.fd1 + '">Edit</a>';
                     }
                 }
             ],
             htmlProps:{
                 className: 'darktable'
-            }
+            },
+            noItem: 'No item'
         };
         
         r = render(<Table id="cidTable" didMountFunction={onDidMount} options={tbConfig}/> );
-        expect(r.container.innerHTML).toEqual('');
+        
+        el = document.getElementsByTagName('td')[0] as HTMLElement;
+        expect(el.getAttribute('colspan')).toEqual('3');
+        expect(el.innerHTML).toEqual('No item');
 
-        objRef.setValue([{fd1:'val 1.1', fd2:'val 1.2'},{fd1:'val 2.1', fd2:'val 2.2'}]);
+        objRef.setValue([{fd1:'val001', fd2:'val 1.2'},{fd1:'val002', fd2:'val 2.2'}]);
         el = document.getElementById('cidTable');
         expect(el).toBeInstanceOf(HTMLTableElement);
         expect(el.className).toEqual('darktable');
+        expect(document.getElementById('lnkval001')).toBeInstanceOf(HTMLAnchorElement);
+
+
+        cleanup();
+        tbConfig = {
+            columns:[
+                {headerLabel: 'Col 1', dataField: 'fd1'},
+                {headerLabel: 'Col 2', dataField: 'fd2'},
+                {
+                    headerLabel: 'Col 3', dataField: null,
+                    htmlItem: '<a id="lnk{fd1}">Edit</a>'
+                }
+            ],
+            htmlProps:{
+                className: 'darktable'
+            },
+            noItem: 'No item'
+        };
+        r = render(<Table id="cidTable" didMountFunction={onDidMount} options={tbConfig}/> );
+        objRef.setValue([{fd1:'val001', fd2:'val 1.2'},{fd1:'val002', fd2:'val 2.2'}]);
+        //screen.debug();
+        expect(document.getElementById('lnkval001')).toBeInstanceOf(HTMLAnchorElement);
 
         cleanup();
         tbConfig = {
@@ -257,18 +328,22 @@ describe('test components', () => {
                 {
                     headerLabel: 'Col 3', dataField: null,
                     buildItem: function(data:any){
-                        return <a href={"view/"+data.fd1}>Edit</a>;
+                        return <a id={"lnk"+data.fd1}>Edit</a>;
                     }
                 }
-            ]
+            ],
+            noItem: 'mycomptable_noitem'
         };
         
         r = render(<Table id="cidTable" didMountFunction={onDidMount} options={tbConfig}/> );
-        expect(r.container.innerHTML).toEqual('');
+        el = document.getElementsByTagName('td')[0] as HTMLElement;
+        expect(el.getAttribute('colspan')).toEqual('3');
+        expect(el.innerHTML).toEqual('Item list is empty');
 
-        objRef.setValue([{fd1:'val 1.1', fd2:'val 1.2'},{fd1:'val 2.1', fd2:'val 2.2'}]);
+        objRef.setValue([{fd1:'val001', fd2:'val 1.2'},{fd1:'val002', fd2:'val 2.2'}]);
         el = document.getElementById('cidTable');
         expect(el).toBeInstanceOf(HTMLTableElement);
+        expect(document.getElementById('lnkval001')).toBeInstanceOf(HTMLAnchorElement);
 
         cleanup();
         tbConfig = {
@@ -283,11 +358,11 @@ describe('test components', () => {
         };
         
         r = render(<Table id="cidTable" didMountFunction={onDidMount} options={tbConfig}/> );
-        expect(r.container.innerHTML).toEqual('');
 
-        objRef.setValue([{fd1:'val 1.1', fd2:'val 1.2'},{fd1:'val 2.1', fd2:'val 2.2'}]);
+        objRef.setValue([{fd1:'val001', fd2:'val 1.2'},{fd1:'val002', fd2:'val 2.2'}]);
         el = document.getElementById('cidTable');
         expect(el).toBeInstanceOf(HTMLTableElement);
+        expect(document.getElementById('btnval001')).toBeInstanceOf(HTMLButtonElement);
 
         objRef.setValue({
             data:[{fd1:'val 1.1', fd2:'val 1.2'},{fd1:'val 2.1', fd2:'val 2.2'}],
@@ -300,7 +375,7 @@ describe('test components', () => {
         expect(el.getAttribute('href')).toEqual('#gotoPage:3');
 
         objRef.setValue({});
-        screen.debug();
+        //screen.debug();
 
     });
     

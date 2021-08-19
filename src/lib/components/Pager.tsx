@@ -1,7 +1,7 @@
 import React from 'react'
 import { BaseComponent } from '../BaseComponent';
-export const Pager = (p: { pageIndex: number, pageSize: number, totalRow: number, parent: BaseComponent, pagingHandler: (sender: BaseComponent, pageIndex: number, pageSize: number) => void }) => {
-    const pageListCount = 7;
+export const Pager = (p: { pageIndex: number, pageSize: number, totalRow: number, parent: BaseComponent, pageListCount?: number, pagingHandler: (sender: BaseComponent, pageIndex: number, pageSize: number) => void }) => {
+    const pageListCount = p.pageListCount || 7;
     const currentPage = p.pageIndex;
     const centerPage = Math.floor(pageListCount / 2);
     let lastPage = Math.floor(p.totalRow / p.pageSize);
