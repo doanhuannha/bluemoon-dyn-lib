@@ -8,10 +8,9 @@ export const Pager = (p: { pageIndex: number, pageSize: number, totalRow: number
     if (p.totalRow % p.pageSize != 0) lastPage++;
 
     const items = [] as React.ReactElement[];
-    const pagerClicked = (evt: React.MouseEvent<HTMLAnchorElement, MouseEvent>, index: number) => {
+    const pagerClicked = (evt: React.MouseEvent<HTMLElement, MouseEvent>, index: number) => {
         if (index != currentPage && p.pagingHandler) p.pagingHandler(p.parent, index, p.pageSize);
         evt.preventDefault();
-
     };
     if (currentPage <= centerPage + 1 || lastPage <= pageListCount) {
         for (let i = 1; i <= pageListCount && i <= lastPage; i++) {
@@ -47,4 +46,19 @@ export const Pager = (p: { pageIndex: number, pageSize: number, totalRow: number
         {items}
     </div>
     );
-}
+};
+export const SimplePager = (p: { pageIndex: number, pageSize: number, hasMoreRow: boolean, parent: BaseComponent, pagingHandler: (sender: BaseComponent, pageIndex: number, pageSize: number) => void }) => {
+    
+    const pagerClicked = (evt: React.MouseEvent<HTMLElement, MouseEvent>, index: number) => {
+        if (p.pagingHandler) p.pagingHandler(p.parent, index, p.pageSize);
+        evt.preventDefault();
+
+    };
+    let  items = [] as React.ReactElement[];
+    if(p.pageIndex>1) items.push(<button onClick={(evt) => { pagerClicked(evt, p.pageIndex - 1); }}>&lt;&lt;</button>);
+    if(p.hasMoreRow) items.push(<button onClick={(evt) => { pagerClicked(evt, p.pageIndex + 1); }}>&gt;&gt;</button>);
+    return (items.length == 0 ? null : <div className="pager">
+        {items}
+    </div>);
+
+};

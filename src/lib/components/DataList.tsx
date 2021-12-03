@@ -2,14 +2,14 @@ import React, { ReactNode } from 'react'
 import { BaseComponent } from '../BaseComponent';
 import { DataPool } from '../DataPool';
 import HtmlTemplate from './HtmlTemplate';
-import { Pager } from './Pager';
+import { Pager, SimplePager } from './Pager';
 export interface DataListConfig {
     component?: any,
     buildItem?: (dataItem: any, index: number) => any
     htmlProps?: any,
     pagingHandler?: (sender: BaseComponent, pageIndex: number, pageSize: number) => void
     noItem?: string,
-    htmlItem?: string 
+    htmlItem?: string
 
 }
 
@@ -18,14 +18,14 @@ export default class DataList extends BaseComponent {
 
         const config = this.props.options as DataListConfig;
         let data = null as any[];
-        let paging = null as { pageSize: number, pageIndex: number, totalRow: number };
+        let paging = null as { pageSize: number, pageIndex: number, totalRow: number, moreRow: boolean };
         const val = this.state.value;
         if (this.state.value != null) {
             if (Array.isArray(val)) {
                 data = val;
             }
             else {
-                const ds = val as { data: any[], pageSize: number, pageIndex: number, totalRow: number };
+                const ds = val as { data: any[], pageSize: number, pageIndex: number, totalRow: number, moreRow: boolean };
                 data = ds.data;
                 paging = ds;
             }
@@ -43,12 +43,12 @@ export default class DataList extends BaseComponent {
             else if (config?.buildItem) {
                 let item = config.buildItem(data[j], j);
                 if (typeof (item) == 'string') {
-                    dataComponents.push(<HtmlTemplate key={itemKey} options={{html: item}} value={data[j]} />);
+                    dataComponents.push(<HtmlTemplate key={itemKey} options={{ html: item }} value={data[j]} />);
                 }
                 else dataComponents.push(<div key={itemKey}>{item}</div>);
             }
             else if (config?.htmlItem) {
-                dataComponents.push(<HtmlTemplate key={itemKey} options={{html: config.htmlItem}} value={data[j]} />);
+                dataComponents.push(<HtmlTemplate key={itemKey} options={{ html: config.htmlItem }} value={data[j]} />);
             }
             else {
                 dataComponents.push(<div key={itemKey}>{data[j]}</div>);
@@ -57,7 +57,7 @@ export default class DataList extends BaseComponent {
         else if (config?.noItem) {
             let DynCom = DataPool.allControls[config.noItem];
             if (DynCom) dataComponents.push(<DynCom key={this.props.id + 'no_data'} />);
-            else dataComponents.push(<HtmlTemplate  key={this.props.id + 'no_data'} options={{ html: config.noItem }}/>);
+            else dataComponents.push(<HtmlTemplate key={this.props.id + 'no_data'} options={{ html: config.noItem }} />);
 
         }
         else dataComponents.push(<div key={this.props.id + 'no_data'}>No data found</div>);
@@ -67,7 +67,10 @@ export default class DataList extends BaseComponent {
             <div id={this.props.id} {...this.props.options?.htmlProps}>
                 {dataComponents}
             </div>
-            {paging ? <><Pager pageIndex={paging.pageIndex} pageSize={paging.pageSize} totalRow={paging.totalRow} pagingHandler={config?.pagingHandler} parent={this} /></> : null}
+            {paging ? <>{paging.moreRow !== undefined ? 
+                    <SimplePager pageIndex={paging.pageIndex} pageSize={paging.pageSize} hasMoreRow={paging.moreRow} pagingHandler={config?.pagingHandler} parent={this} /> 
+                    : <Pager pageIndex={paging.pageIndex} pageSize={paging.pageSize} totalRow={paging.totalRow} pagingHandler={config?.pagingHandler} parent={this} />}</> 
+            : null}
 
         </>);
     }

@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react'
 import { BaseComponent } from '../BaseComponent';
 import { DataPool } from '../DataPool';
-import { Pager } from './Pager';
+import { Pager, SimplePager } from './Pager';
 import HtmlTemplate from './HtmlTemplate';
 export interface TableConfig {
     columns: {
@@ -27,12 +27,12 @@ export default class Table extends BaseComponent {
 
 
         let data = null as any[];
-        let paging = null as { pageSize: number, pageIndex: number, totalRow: number };
+        let paging = null as { pageSize: number, pageIndex: number, totalRow: number, moreRow: boolean  };
         if (Array.isArray(val)) {
             data = val;
         }
         else {
-            const ds = val as { data: any[], pageSize: number, pageIndex: number, totalRow: number };
+            const ds = val as { data: any[], pageSize: number, pageIndex: number, totalRow: number, moreRow: boolean  };
             data = ds.data;
             if (data) paging = ds;
         }
@@ -81,7 +81,11 @@ export default class Table extends BaseComponent {
                     {dataComponents}
                 </tbody>
             </table>
-            {paging ? <Pager pageIndex={paging.pageIndex} pageSize={paging.pageSize} totalRow={paging.totalRow} pagingHandler={config.pagingHandler} parent={this} /> : null}
+  
+            {paging ? <>{paging.moreRow !== undefined ? 
+                    <SimplePager pageIndex={paging.pageIndex} pageSize={paging.pageSize} hasMoreRow={paging.moreRow} pagingHandler={config?.pagingHandler} parent={this} /> 
+                    : <Pager pageIndex={paging.pageIndex} pageSize={paging.pageSize} totalRow={paging.totalRow} pagingHandler={config?.pagingHandler} parent={this} />}</> 
+            : null}
         </>);
     }
 

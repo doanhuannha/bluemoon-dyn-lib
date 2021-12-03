@@ -211,6 +211,19 @@ declare global {
             reactjs: {
                 staticViewDefs: any,
                 staticFieldDefs: any
+            },
+            apis: {
+                [name: string]: {
+                    url: string,
+                    apiParamsFunc?: (requestData: any, url: string) => any,
+                    dataConvertorFunc?: (responeData: any, url: string) => any
+                }
+            },
+            dataConvertors: {
+                [name: string]: {
+                    convert: (responeData: any) => any
+                }
+
             }
         }
     }
