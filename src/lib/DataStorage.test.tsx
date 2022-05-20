@@ -49,7 +49,6 @@ describe('test data storage',()=>{
         //try to unregister
         expect(DataStorage.unregister(storeName, MyComp2_forceUpdate)).toEqual(true);
         expect(DataStorage.unregister(storeName, comp1Instance)).toEqual(true);
-        expect(DataStorage.unregister(storeName, {})).toEqual(false);
         expect(DataStorage.unregister(storeName, null)).toEqual(false);
 
         expect(DataStorage.unregister(storeName+storeName, null)).toEqual(false);
