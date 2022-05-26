@@ -24,7 +24,7 @@ export default class Table extends BaseComponent {
         const val = this.state.value || {};
         const config = this.props.options as TableConfig;
         window.utilities.merge(config, val.options);
-
+        if(!config.columns) return null;
 
         let data = null as any[];
         let paging = null as { pageSize: number, pageIndex: number, totalRow: number, moreRow: boolean  };

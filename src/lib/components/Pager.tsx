@@ -55,8 +55,8 @@ export const SimplePager = (p: { pageIndex: number, pageSize: number, hasMoreRow
 
     };
     let  items = [] as React.ReactElement[];
-    if(p.pageIndex>1) items.push(<button onClick={(evt) => { pagerClicked(evt, p.pageIndex - 1); }}>&lt;&lt;</button>);
-    if(p.hasMoreRow) items.push(<button onClick={(evt) => { pagerClicked(evt, p.pageIndex + 1); }}>&gt;&gt;</button>);
+    if(p.pageIndex>1) items.push(<button key={'pager_prev'} onClick={(evt) => { pagerClicked(evt, p.pageIndex - 1); }}>&lt;&lt;</button>);
+    if(p.hasMoreRow) items.push(<button key={'pager_next'} onClick={(evt) => { pagerClicked(evt, p.pageIndex + 1); }}>&gt;&gt;</button>);
     return (items.length == 0 ? null : <div className="pager">
         {items}
     </div>);

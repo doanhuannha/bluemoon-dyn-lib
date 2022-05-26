@@ -11,14 +11,17 @@ type PostData = {
 export const execApiAsync = function (url: string, requestData: any, recalled?: boolean): Promise<Response> {
     if (requestData && requestData.shouldCancel === true) {
         if(requestData.localData == undefined){
-            return null;
+            return new Promise<Response>((resolve, reject) => {
+                const response = new Response('null');
+                resolve(response);
+            });
         }
         else{
             return new Promise<Response>((resolve, reject) => {
                 _debug('return local data if any and cancel call api: ' + url);
                 const response = new Response(JSON.stringify(requestData.localData));
                 resolve(response);
-            });;
+            });
         }
         
     }
@@ -28,6 +31,7 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
         const cachedData = execApiAsync.CachedPool.get(cachedName);
         if (cachedData) {
             if (cachedData.execApiAsyncState === 'processing') {
+                
                 return new Promise<Response>((resolve, reject) => {
                     setTimeout(() => {
                         reject(null);
@@ -93,21 +97,20 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
                     const expired = new Date();
                     expired.setTime(expired.getTime() + 5000);//cache 5 seconds
                     if (DynConfig.apiCache) execApiAsync.CachedPool.set(cachedName, s, expired);
-                    return new Promise<Response>((resolve, reject) => {
+                    return new Promise<Response>((resolve, _) => {
                         resolve(new Response(s));
                         toggleLoadingPanel(false);
                     });
                 }).catch(r => {
-
-                    return new Promise<Response>((resolve, reject) => {
+                    return new Promise<Response>((_, reject) => {
                         reject(r);
                         toggleLoadingPanel(false);
                     });
                 });
             }
             else {
-                return new Promise<Response>((resolve, reject) => {
-                    execApiAsync.CachedPool.del(cachedName)
+                return new Promise<Response>((_, reject) => {
+                    execApiAsync.CachedPool.del(cachedName);
                     reject({
                         url,
                         status: res.status,

@@ -149,9 +149,9 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
             if (this.dataApiParams instanceof Function) postData = this.dataApiParams(this, url, this.context);
             else postData = this.dataApiParams;
         }
+        
         execApiAsync(url, postData).then(response => response.json()).then(data => {
             if (data != null) this.bindData(this.dataField ? window.utilities.extractValue(data, this.dataField) : data, false);
-            else _debug('dataApi return null: ' + url);
         }).catch(error => {
             _debug('error on request: ' + url);
             _debug(error);

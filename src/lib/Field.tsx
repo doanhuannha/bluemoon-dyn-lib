@@ -32,6 +32,7 @@ export class Field extends React.Component<IFieldProps & { [name: string]: any }
                 else postData = window.utilities.merge(this.props.dataApiParamsFunc(this.control.current, url, this.context), postData);
             }
             execApiAsync(url, postData).then(response => response.json()).then(data => {
+                if(!this.control.current) return;
                 this.control.current.setDataSource(data);
                 if (this.delayValue) {
                     this.control.current.setValue(this.delayValue.value, this.delayValue.isDefault);
@@ -40,7 +41,6 @@ export class Field extends React.Component<IFieldProps & { [name: string]: any }
             }).catch(error => {
                 _debug('error on request: ' + url);
                 _debug(error);
-
             });
         }
     }

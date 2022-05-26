@@ -2,6 +2,7 @@ import { DynConfig } from "./DynConfig";
 
 export const _debug = function (msg: any, persistent: boolean | number) {
     if (!DynConfig.debug) return;
+
     if (_debug._debugPanel == null) {
         var panel = document.createElement('div');
         panel.className = 'debug-info';
@@ -14,8 +15,17 @@ export const _debug = function (msg: any, persistent: boolean | number) {
         document.body.appendChild(panel);
         _debug._debugPanel = panel;
     }
+    if(msg instanceof Error) {
+        var err = msg as Error;
+        msg = {
+            name: err.name,
+            message: err.name,
+            stack: err.stack
+        }
+    }
     _debug._debugPanel.style.display = 'block';
     _debug._debugPanel.innerHTML += JSON.stringify(msg) + '<br/>';
+    console.log(msg);
     if (persistent === true) { }
     else {
         clearTimeout(_debug._debugPanel.timer);
