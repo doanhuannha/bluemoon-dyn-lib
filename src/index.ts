@@ -25,6 +25,7 @@ export * from './lib/WizardPage';
 export * from './lib/DynConfig';
 export * from './lib/DataPool';
 export * from './lib/DataStorage';
+export * from './lib/controls/BaseTab';
 export {TableConfig} from './lib/components/Table';
 export {_debug} from './lib/Utilities.debug';
 export {execApiAsync} from './lib/Utilities.execApi';
