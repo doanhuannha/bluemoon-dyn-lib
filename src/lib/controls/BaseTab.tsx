@@ -34,8 +34,8 @@ export abstract class BaseTab extends React.Component<TabAtts, TabState> {
         };
         //assign tab ref
         for (const tabName in this.props.dataSource) {
-            var pp = this.props.dataSource[tabName].content.props;
-            var tabRef = pp.tabRef as TabRef;
+            let pp = this.props.dataSource[tabName].content.props;
+            let tabRef = pp.tabRef as TabRef;
             if (tabRef && !tabRef.instance) tabRef.instance = this;
         }
     }
@@ -50,12 +50,14 @@ export abstract class BaseTab extends React.Component<TabAtts, TabState> {
     public addTab(tabName: string, tabDetail: TabItem) {
         const ds = this.state.dataSource || {};
         if (ds[tabName] == null) ds[tabName] = tabDetail;
-        var pp = tabDetail.content.props;
-        var tabRef = pp.tabRef as TabRef;
+        let pp = tabDetail.content.props;
+        let tabRef = pp.tabRef as TabRef;
         if (tabRef && !tabRef.instance) tabRef.instance = this;
         this.setState({ activeTab: tabName });
-        setTimeout(tab => {
-            tab.getHeadRef(tabName).scrollIntoView({ behavior: 'smooth' });
+        setTimeout((tab: BaseTab) => {
+            let el = tab.getHeadRef(tabName);
+            var pos = el.getBoundingClientRect();
+            if (pos.top < 0 || pos.top > window.innerHeight) el.scrollIntoView({ behavior: 'smooth' });
         }, 100, this);
     }
     protected navigateTo(tabName: string) {
@@ -101,8 +103,8 @@ export abstract class BaseTab extends React.Component<TabAtts, TabState> {
     }
 }
 export class BootstrapTab extends BaseTab {
-    
-    private _headRefs: {[name:string]: React.RefObject<HTMLAnchorElement>} = {};
+
+    private _headRefs: { [name: string]: React.RefObject<HTMLAnchorElement> } = {};
     protected getHeadRef(name: string): HTMLElement {
         return this._headRefs[name].current;
     }
@@ -116,9 +118,9 @@ export class BootstrapTab extends BaseTab {
     }
     protected renderHead(name: string, tab: TabItem, active: boolean): JSX.Element {
         this._headRefs[name] = React.createRef();
-        return <li className="nav-item" key={'tab' + name} onClick={active ? null : () => { this.navigateTo(name) }}>
-            <a ref={this._headRefs[name]} className={active ? 'nav-link active' : 'nav-link'} href="#" onClick={(evt) => { evt.preventDefault(); }}>{tab.title || '[Untitled]'}</a>
-            {tab.closable ? <span onClick={() => { this.closeTab(name) }}>X</span> : null}
+        return <li className="nav-item" key={'tab' + name} onClick={active ? null : () => { this.navigateTo(name); }}>
+            <a ref={this._headRefs[name]} className={active ? 'nav-link active' : 'nav-link'} href="#" onClick={evt => { evt.preventDefault(); }}>{tab.title || '[Untitled]'}</a>
+            {tab.closable ? <span onClick={evt => { this.closeTab(name); evt.stopPropagation(); }}>X</span> : null}
         </li>;
     }
     protected renderContent(name: string, tab: TabItem, active: boolean): JSX.Element {
