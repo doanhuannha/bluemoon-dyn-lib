@@ -15,21 +15,20 @@ export default class HtmlTemplate extends BaseComponent{
         
         return s;
     };
-    elContainer = React.createRef<HTMLDivElement>();
-    renderedEls = [] as any[];
+    _elContainer = React.createRef<HTMLDivElement>();
+    _renderedEls = [] as HTMLElement[];
     componentWillUnmount(){
-        if(this.renderedEls && this.renderedEls.length>0){
-            for(let i = 0;i<this.renderedEls.length;i++){
-                const el = this.renderedEls[i];
-                if(el) el.parentElement.removeChild(el);
-                
+        if(this._renderedEls && this._renderedEls.length>0){
+            for(let i = 0;i<this._renderedEls.length;i++){
+                const el = this._renderedEls[i];
+                if(el) el.remove();
             }    
-            this.renderedEls = [];
+            this._renderedEls = [];
         }
     }
     componentDidMount(){
         
-        const divCont = this.elContainer.current;
+        const divCont = this._elContainer.current;
         if(divCont){
             const data = this.state.value || this.props.value;
             
@@ -42,18 +41,18 @@ export default class HtmlTemplate extends BaseComponent{
             const nextSibling = divCont.nextSibling;
             if(nextSibling) while(divCont.childNodes.length>0){ 
                 pp.insertBefore(divCont.childNodes[0], nextSibling);
-                this.renderedEls.push(divCont.childNodes[0] as HTMLElement);
+                this._renderedEls.push(divCont.childNodes[0] as HTMLElement);
             }
             else while(divCont.childNodes.length>0) {
                 pp.appendChild(divCont.childNodes[0]);
-                this.renderedEls.push(divCont.childNodes[0]);
+                this._renderedEls.push(divCont.childNodes[0] as HTMLElement);
             }
-
+            divCont.remove();
             
             
         }
     }
     protected renderComponent() {
-        return <div ref={this.elContainer} className="tpl-renderer" style={{display: 'none'}}></div>
+        return <div ref={this._elContainer} className="tpl-renderer" style={{display: 'none'}}></div>
     }
 }

@@ -18,14 +18,14 @@ export const Pager = (p: { pageIndex: number, pageSize: number, totalRow: number
         }
         if (lastPage > pageListCount) {
             
-            items.push(<a key={'li_' + 0} href="#" onClick={() => { return false; }}>...</a>);
+            items.push(<a key={'li_' + 0} href="#" onClick={(evt) => { evt.preventDefault(); return false; }}>...</a>);
             items.push(<a key={'li_' + lastPage} href={'#gotoPage:' + lastPage} onClick={(evt) => { pagerClicked(evt, lastPage); }}>{lastPage}</a>);
         }
     }
     else if (currentPage > lastPage - centerPage - 1) {
         if (lastPage > pageListCount) {
             items.push(<a key={'li_' + 1} href="#gotoPage:1" onClick={(evt) => { pagerClicked(evt, 1); }}>1</a>);
-            items.push(<a key={'li_' + 0} href="#" onClick={() => { return false; }}>...</a>);
+            items.push(<a key={'li_' + 0} href="#" onClick={(evt) => { evt.preventDefault(); return false; }}>...</a>);
         }
         for (let i = lastPage - pageListCount + 1; i <= lastPage; i++) {
 
@@ -34,12 +34,12 @@ export const Pager = (p: { pageIndex: number, pageSize: number, totalRow: number
     }
     else {
         items.push(<a key={'li_' + 1} href="#gotoPage:1" onClick={(evt) => { pagerClicked(evt, 1); }}>1</a>);
-        items.push(<a key={'li_S'} href="#" onClick={() => { return false; }}>...</a>);
+        items.push(<a key={'li_S'} href="#" onClick={(evt) => { evt.preventDefault(); return false; }}>...</a>);
         for (let i = currentPage - centerPage; i <= currentPage + centerPage && i <= lastPage; i++) {
 
             items.push(<a key={'li_' + i} className={i == currentPage ? 'current' : null} href={'#gotoPage:' + i} onClick={(evt) => { pagerClicked(evt, i); }}>{i}</a>);
         }
-        items.push(<a key={'li_E'} href="#" onClick={() => { return false; }}>...</a>);
+        items.push(<a key={'li_E'} href="#" onClick={(evt) => { evt.preventDefault(); return false; }}>...</a>);
         items.push(<a key={'li_' + lastPage} href={'#gotoPage:' + lastPage} onClick={(evt) => { pagerClicked(evt, lastPage); }}>{lastPage}</a>);
     }
     return (items.length <= 1 ? null : <div className="pager">
