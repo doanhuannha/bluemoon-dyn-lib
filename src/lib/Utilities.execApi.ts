@@ -11,13 +11,13 @@ type PostData = {
 export const execApiAsync = function (url: string, requestData: any, recalled?: boolean): Promise<Response> {
     if (requestData && requestData.shouldCancel === true) {
         if(requestData.localData == undefined){
-            return new Promise<Response>((resolve, reject) => {
+            return new Promise<Response>((resolve, _) => {
                 const response = new Response('null');
                 resolve(response);
             });
         }
         else{
-            return new Promise<Response>((resolve, reject) => {
+            return new Promise<Response>((resolve, _) => {
                 _debug('return local data if any and cancel call api: ' + url);
                 const response = new Response(JSON.stringify(requestData.localData));
                 resolve(response);
@@ -32,7 +32,7 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
         if (cachedData) {
             if (cachedData.execApiAsyncState === 'processing') {
                 
-                return new Promise<Response>((resolve, reject) => {
+                return new Promise<Response>((_, reject) => {
                     setTimeout(() => {
                         reject(null);
                     }, 5);
@@ -42,7 +42,7 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
 
                 });
             }
-            else return new Promise<Response>((resolve, reject) => {
+            else return new Promise<Response>((resolve, _) => {
                 _debug('load from cache: ' + url);
                 const response = new Response(cachedData);
                 resolve(response);

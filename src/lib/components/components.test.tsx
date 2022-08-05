@@ -76,8 +76,6 @@ describe('test components', () => {
         fireEvent.click(document.querySelector('a[href="#gotoPage:3"]'));
         expect(pagingHandler).toBeCalledTimes(2);
 
-        screen.debug();
-
         /*
         cleanup();
         r = render(<Pager pageIndex={1} pageSize={7} totalRow={35} pagingHandler={pagingHandler} parent={parent} pageListCount={3}/> );

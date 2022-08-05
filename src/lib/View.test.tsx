@@ -436,7 +436,7 @@ describe('test view', () => {
         let r = render(<View id="cidViewContainer" name="viewT" onDataBound={dataBound} dataApiParams={{}} onDidUpdate={()=>{}} />);
 
     });
-
+    
     
     test('load view with layout', () => {
         let r = render(<View id="cidViewContainer" name="viewL" />);
@@ -532,7 +532,7 @@ describe('test view', () => {
 
 
     });
-
+    
     test('load view with data api return null', done => {
         const cnt = ut1._debug.mock.calls.length;
         let r = render(<View id="cidViewContainer" name="viewZZ" />);

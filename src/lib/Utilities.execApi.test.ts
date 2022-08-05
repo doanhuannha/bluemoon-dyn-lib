@@ -113,7 +113,10 @@ describe('test execApi', () => {
     
     test('test execApi GET', done => {
         let r = execApiAsync('/fakeUrl', { shouldCancel: true });
-        expect(r).toEqual(null);
+        r.then(rr => rr.json()).then(d => {
+            expect(d).toEqual(null);
+            done();
+        });
 
         r = execApiAsync('/fakeUrl', null);
         r.then(rr => rr.json()).then(d => {
