@@ -4,6 +4,7 @@ import { DynConfig } from './DynConfig';
 import './Utilities.tsx';
 import { DataPool } from './DataPool';
 import { ConfigLoader } from './ConfigLoader';
+import { IFieldItem } from './Defs';
 
 
 jest.mock('./View', ()=>{
@@ -33,11 +34,16 @@ test('test ConfigLoader', () => {
     el = screen.getByText('vwConfigLoaderView');
     expect(el).toBeInstanceOf(HTMLHeadingElement);
     cleanup();
-    render(<div><div role="react-loader" data-page="configLoaderPage"></div><ConfigLoader fieldUrls={['field1.js','field2.js']} viewUrls={['view1.js','view2.js']}></ConfigLoader></div>);
+
+    render(<div><div role="react-loader" data-test="title-1" data-page="configLoaderPage"></div><ConfigLoader fieldUrls={['field1.js','field2.js']} viewUrls={['view1.js','view2.js']}></ConfigLoader></div>);
+    screen.debug();
     el = screen.getByText('configLoaderPage');
     expect(el).toBeInstanceOf(HTMLHeadingElement);
-
-    render(<div><div role="react-loader" data-page="notFoundPage"></div><ConfigLoader fieldUrls={['field1.js','field2.js']} viewUrls={['view1.js','view2.js']}></ConfigLoader></div>);
+    window.bluemoon = {reactjs: {staticFieldDefs: {}, staticViewDefs: {}}};
+    render(<div><div role="react-loader" data-page="notFoundPage"></div><ConfigLoader/></div>);
     el = screen.getByText('Cannot find the page name: notFoundPage');
     expect(el).toBeInstanceOf(HTMLDivElement);
+
+
+
 });

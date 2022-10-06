@@ -18,13 +18,16 @@ export class ConfigLoader extends React.Component<ConfigLoaderProps, ConfigLoade
     }
     private parseAttibutes(atts: NamedNodeMap): any {
         const ret = {};
-        for (let i = 0; i < atts.length; i++) {
-            if(atts[i].name=='class'){
-                ret['className'] = atts[i].value;
+        for (let i = 0; i < atts.length; i++)
+            switch(atts[i].name){
+                case 'data-view':
+                case 'data-page':
+                case 'role':
+                    break;
+                default:
+                    ret[atts[i].name] = atts[i].value;
+                    break;
             }
-            else ret[atts[i].name] = atts[i].value;
-            
-        }
         return ret;
     }
     private htmlDecode(s: string): string {
@@ -82,8 +85,8 @@ export class ConfigLoader extends React.Component<ConfigLoaderProps, ConfigLoade
 
 }
 type ConfigLoaderProps = {
-    fieldUrls: string[],
-    viewUrls: string[],
+    fieldUrls?: string[],
+    viewUrls?: string[],
     callback?: () => void;
 }
 type ConfigLoaderState = {}

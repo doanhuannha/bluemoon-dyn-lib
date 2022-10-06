@@ -208,18 +208,18 @@ declare global {
         },
         toggleLoadingPanel(visible: boolean): void,
         bluemoon: {
-            reactjs: {
-                staticViewDefs: any,
-                staticFieldDefs: any
+            reactjs?: {
+                staticViewDefs?: any,
+                staticFieldDefs?: any
             },
-            apis: {
+            apis?: {
                 [name: string]: {
                     url: string,
                     apiParamsFunc?: (requestData: any, url: string) => any,
                     dataConvertorFunc?: (responeData: any, url: string) => any
                 }
             },
-            dataConvertors: {
+            dataConvertors?: {
                 [name: string]: {
                     convert: (responeData: any) => any
                 }
