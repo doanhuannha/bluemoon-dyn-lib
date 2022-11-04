@@ -63,6 +63,7 @@ export interface IBaseComponentProps {
     didMountFunction?: DidMountFunction,
     value?: any,
     defaultValue?: any,
+    displayValue?: any,
     //dataField?: string,
     label?: string,
     validationFunc?: ValidationFunction,
@@ -97,6 +98,7 @@ export type FieldDefine = {
 
 export interface IComponentState {
     value: any,
+    displayValue?: any,
     visible: boolean,
     enable: boolean,
     readonly: boolean,

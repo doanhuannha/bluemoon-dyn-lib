@@ -8,7 +8,7 @@ type PostData = {
     shouldCancel: boolean
 };
 */
-export const execApiAsync = function (url: string, requestData: any, recalled?: boolean): Promise<Response> {
+export const execApiAsync = function (url: string, requestData: any, forcedToCall?: boolean, _recalled?: boolean): Promise<Response> {
     if (requestData && requestData.shouldCancel === true) {
         if(requestData.localData == undefined){
             return new Promise<Response>((resolve, _) => {
@@ -26,32 +26,35 @@ export const execApiAsync = function (url: string, requestData: any, recalled?: 
         
     }
     else {
-        if (!recalled) toggleLoadingPanel(true);
+        if (!_recalled) toggleLoadingPanel(true);
         const cachedName = JSON.stringify({ url, requestData });
-        const cachedData = execApiAsync.CachedPool.get(cachedName);
-        if (cachedData) {
-            if (cachedData.execApiAsyncState === 'processing') {
-                
-                return new Promise<Response>((_, reject) => {
-                    setTimeout(() => {
-                        reject(null);
-                    }, 5);
+        if(!forcedToCall){
+            const cachedData = execApiAsync.CachedPool.get(cachedName);
+            if (cachedData) {
+                if (cachedData.execApiAsyncState === 'processing') {
+                    
+                    return new Promise<Response>((_, reject) => {
+                        setTimeout(() => {
+                            reject(null);
+                        }, 5);
 
-                }).catch(d => {
-                    return execApiAsync(url, requestData, true);
+                    }).catch(d => {
+                        return execApiAsync(url, requestData, forcedToCall, true);
 
+                    });
+                }
+                else return new Promise<Response>((resolve, _) => {
+                    _debug('load from cache: ' + url);
+                    const response = new Response(cachedData);
+                    resolve(response);
+                    toggleLoadingPanel(false);
                 });
             }
-            else return new Promise<Response>((resolve, _) => {
-                _debug('load from cache: ' + url);
-                const response = new Response(cachedData);
-                resolve(response);
-                toggleLoadingPanel(false);
-            });
+            const expired = new Date();
+            expired.setTime(expired.getTime() + 1 * 7654);// set expired time for cache: 7654 ms
+            if (DynConfig.apiCache) execApiAsync.CachedPool.set(cachedName, { execApiAsyncState: 'processing' }, expired);
         }
-        const expired = new Date();
-        expired.setTime(expired.getTime() + 1 * 60000);// wait for 1 minute, then request URL
-        if (DynConfig.apiCache) execApiAsync.CachedPool.set(cachedName, { execApiAsyncState: 'processing' }, expired);
+        
         const headers = new Headers();
         headers.append('Accept', 'application/json');
         let method = 'GET';

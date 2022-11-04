@@ -54,7 +54,11 @@ export class Field extends React.Component<IFieldProps & { [name: string]: any }
         if (this.props.sourceField) value = window.utilities.extractValue(val, this.props.sourceField);
         if (value != undefined) this.control.current.setDataSource(value);
         value = undefined;
-        if (this.props.dataField) value = window.utilities.extractValue(val, this.props.dataField);
+
+        if (this.props.dataField){ 
+            value = window.utilities.extractValue(val, this.props.dataField);
+            this.control.current.setDisplayValue(window.utilities.extractValue(val, this.props.dataField+"_Display"));
+        }
         if (value != undefined) {
             if (this.props.dataSourceApi && this.control.current.getDataSource() == null) {
                 //should not bind value now

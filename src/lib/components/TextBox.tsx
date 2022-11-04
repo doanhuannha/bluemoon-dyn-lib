@@ -20,7 +20,7 @@ export default class TextBox extends BaseComponent {
         }
         return <span>
             {this.props.label ? (<label htmlFor={this.props.id}>{this.props.label}</label>) : null}
-            {this.state.readonly ? <span>{val}</span>
+            {this.state.readonly ? <span>{window.utilities.getDefault(this.getDisplayValue(), val)}</span>
                 : <input type={textType || 'text'} id={this.props.id} value={val} disabled={!this.state.enable} onChange={(event) => this.onChangedHandler(event)} />
             }
         </span>

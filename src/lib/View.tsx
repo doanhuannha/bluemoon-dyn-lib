@@ -109,19 +109,6 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
         }
 
     }
-    public componentDidUpdate() {
-        if (this.props.onDidUpdate) this.props.onDidUpdate(this);
-    }
-    /*
-    public componentDidUpdate() {
-        if (this.layout && this.layout.status === 'ready') {//layout mode: bind data when layout is ready
-            if (this.layout.dataReady === false) {
-                this.componentDidMount();
-                this.layout.dataReady = true;
-            }
-        }
-    }
-    */
     private findField(name: string, val: string): HTMLElement {
         let p = document.querySelector('[' + name + '="' + val + '"]');
         if (p) return p as HTMLElement;
@@ -142,7 +129,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
         }
         if (fields.length > 0 && this.props.onDataBound) this.props.onDataBound(this, fields);
     }
-    public rebind(url?: string) {
+    public rebind(url?: string, force?: boolean) {
         if (!url) url = this.dataApi;
         let postData = null;
         if (this.dataApiParams) {
@@ -150,9 +137,10 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
             else postData = this.dataApiParams;
         }
         
-        execApiAsync(url, postData).then(response => response.json()).then(data => {
+        execApiAsync(url, postData, force).then(response => response.json()).then(data => {
             if (data != null) this.bindData(this.dataField ? window.utilities.extractValue(data, this.dataField) : data, false);
             else _debug('dataApi return null: '+ url);
+            if (this.props.onDidUpdate) this.props.onDidUpdate(this);
         }).catch(error => {
             _debug('error on request: ' + url);
             _debug(error);

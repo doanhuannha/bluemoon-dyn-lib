@@ -13,6 +13,7 @@ export abstract class BaseComponent extends React.Component<IBaseComponentProps 
         super(props);
         this.state = {
             value: props?.value == undefined ? null : props.value,
+            displayValue: props?.displayValue == undefined ? null : props.displayValue,
             visible: props?.visible == null ? true : props.visible,
             enable: props?.enable == null ? true : props.enable,
             dataSource: props?.dataSource || null,
@@ -34,6 +35,12 @@ export abstract class BaseComponent extends React.Component<IBaseComponentProps 
     }
     public getValue(): any {
         return this.state.value == null ? this.defaultValue || this.state.value : this.state.value;
+    }
+    public setDisplayValue(val: any): void {
+        this.setState({ displayValue: val });
+    }
+    public getDisplayValue(): any {
+        return this.state.displayValue;
     }
     public setVisible(visible: boolean): void {
         this.setState({ visible: visible });

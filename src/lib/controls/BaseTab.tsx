@@ -47,7 +47,7 @@ export abstract class BaseTab extends React.Component<TabAtts, TabState> {
         }
         return false;
     }
-    public addTab(tabName: string, tabDetail: TabItem) {
+    public addTab(tabName: string, tabDetail: TabItem, onclosedTab?: (sender: BaseTab) => void) {
         const ds = this.state.dataSource || {};
         if (ds[tabName] == null) ds[tabName] = tabDetail;
         let pp = tabDetail.content.props;
@@ -59,6 +59,9 @@ export abstract class BaseTab extends React.Component<TabAtts, TabState> {
             var pos = el.getBoundingClientRect();
             if (pos.top < 0 || pos.top > window.innerHeight) el.scrollIntoView({ behavior: 'smooth' });
         }, 100, this);
+        if(onclosedTab){
+            this.closedTab[tabName] = onclosedTab;
+        }
     }
     protected navigateTo(tabName: string) {
         this.setState({ activeTab: tabName });
