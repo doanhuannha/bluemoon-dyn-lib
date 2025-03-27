@@ -191,6 +191,7 @@ describe('test view', () => {
             {
                 name: 'fieldB'
             }],
+            dataField: 'anyfield',
             dataApi: '/fakeData_null'
         },
         viewTT: {
@@ -532,7 +533,7 @@ describe('test view', () => {
 
 
     });
-    
+    //*
     test('load view with data api return null', done => {
         const cnt = ut1._debug.mock.calls.length;
         let r = render(<View id="cidViewContainer" name="viewZZ" />);
@@ -547,4 +548,5 @@ describe('test view', () => {
         });
         
     });
+    //*/
 });

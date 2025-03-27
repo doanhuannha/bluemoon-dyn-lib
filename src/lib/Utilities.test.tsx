@@ -146,7 +146,7 @@ describe('test window.utilities', () => {
             expect(r.data).toEqual('lv0');
 
             r = window.utilities.extractValue(null, 'level0');
-            expect(r).toEqual(null);
+            expect(r).toEqual(undefined);
         });
         test('get nested',()=>{
             let r = window.utilities.extractValue(ds, 'level0.level1');

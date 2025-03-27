@@ -65,7 +65,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
         }
         return viewDef;
     }
-    
+
     private initView(viewDef: ViewDefine) {
         this.viewDef = this.processViewInherit(viewDef);
         this.dataApi = this.viewDef.dataApi;
@@ -136,10 +136,14 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
             if (this.dataApiParams instanceof Function) postData = this.dataApiParams(this, url, this.context);
             else postData = this.dataApiParams;
         }
-        
+
         execApiAsync(url, postData, force).then(response => response.json()).then(data => {
-            if (data != null) this.bindData(this.dataField ? window.utilities.extractValue(data, this.dataField) : data, false);
-            else _debug('dataApi return null: '+ url);
+            if (data != null) {
+                if (this.dataField) data = window.utilities.extractValue(data, this.dataField);
+                if (data !== undefined) this.bindData(data, false);
+                else _debug('dataApi return data, but ' + this.dataField + ' is undefined: ' + url);
+            }
+            else _debug('dataApi return null: ' + url);
             if (this.props.onDidUpdate) this.props.onDidUpdate(this);
         }).catch(error => {
             _debug('error on request: ' + url);
@@ -256,7 +260,7 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
         if (fieldDef.inherit && DataPool.allFields[fieldDef.inherit]) {
             fieldDef = window.utilities.merge({}, this.processFieldInherit(DataPool.allFields[fieldDef.inherit]), fieldDef);
         }
-        
+
         return fieldDef;
     }
     private buildFields(): any[] {
@@ -271,8 +275,8 @@ export class View extends React.Component<IViewProps, IViewState> implements IVi
                     //_debug(this.fields[i]);
                     //const fieldProps = this.processFieldInherit(DataPool.allFields[this.fields[i].name]) as IComponentProps;
                     const fieldProps = {} as IComponentProps;
-                    
-                    
+
+
                     //window.utilities.merge(DataPool.allFields[this.fields[i].name], this.fields[i]);
                     window.utilities.merge(fieldProps, this.processFieldInherit(DataPool.allFields[this.fields[i].name]), this.fields[i]);
                     //_debug('overwritten');

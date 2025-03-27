@@ -1,6 +1,6 @@
 {
   "name": "bluemoon-dyn-lib",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "Dynamic views",
   "author": "Bluemoon",
   "license": "MIT",
@@ -14,7 +14,7 @@
   "scripts": {
     "build": "rollup -c",
     "test": "jest --coverage --passWithNoTests --verbose --watchAll=false",
-    "test:partial": "jest --coverage --passWithNoTests --verbose --testPathPattern=src/lib/ConfigLoader.test"
+    "test:partial": "jest --coverage --passWithNoTests --verbose --testPathPattern=src/lib/Field.test"
   },
   "dependencies": {
     "@types/react": "16.9.4",

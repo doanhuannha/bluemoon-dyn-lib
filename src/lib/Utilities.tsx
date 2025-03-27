@@ -33,13 +33,13 @@ window.utilities = {
         const pos = field.indexOf('.');
         if (pos > 0) {
             let ff = field.substr(0, pos);
-            if (obj[ff] == null || obj[ff] == undefined) obj[ff] = {};
+            if (obj[ff] == null) obj[ff] = {};
             this.setValue(obj[ff], field.substr(pos + 1), val);
         }
         else obj[field] = val;
     },
     extractValue: function (val: any, field: string): any {
-        if (val == null || val == undefined) return val;
+        if (val == null) return undefined;
         const pos = field.indexOf('.');
 
         if (pos > 0)

@@ -12,15 +12,15 @@ export abstract class BaseComponent extends React.Component<IBaseComponentProps 
     constructor(props: IBaseComponentProps & {[name:string]: any}) {
         super(props);
         this.state = {
-            value: props?.value == undefined ? null : props.value,
-            displayValue: props?.displayValue == undefined ? null : props.displayValue,
+            value: props?.value == null ? null : props.value,
+            displayValue: props?.displayValue == null ? null : props.displayValue,
             visible: props?.visible == null ? true : props.visible,
             enable: props?.enable == null ? true : props.enable,
             dataSource: props?.dataSource || null,
             readonly: props?.readonly == null ? false : props.readonly,
             valid: true
         };
-        this.defaultValue = props?.defaultValue;
+        this.defaultValue = props?.defaultValue || null;
         
     }
 	public getDataSource() {

@@ -10,15 +10,16 @@ type PostData = {
 */
 export const execApiAsync = function (url: string, requestData: any, forcedToCall?: boolean, _recalled?: boolean): Promise<Response> {
     if (requestData && requestData.shouldCancel === true) {
-        if(requestData.localData == undefined){
+        if(requestData.localData == null){
+            _debug('cancel to call: ' + url);
             return new Promise<Response>((resolve, _) => {
                 const response = new Response('null');
                 resolve(response);
             });
         }
         else{
+            _debug('return local data and cancel to call api: ' + url);
             return new Promise<Response>((resolve, _) => {
-                _debug('return local data if any and cancel call api: ' + url);
                 const response = new Response(JSON.stringify(requestData.localData));
                 resolve(response);
             });

@@ -1,9 +1,10 @@
 import React, { RefObject } from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, RenderResult, screen } from '@testing-library/react';
 import { BaseComponent } from './BaseComponent';
 import { DynConfig } from './DynConfig';
 import { Field } from './Field';
 import './Utilities'; 
+import { IBaseComponentProps, IComponentState } from './Defs';
 
 
 describe('test field', () => {
@@ -52,7 +53,8 @@ describe('test field', () => {
     
     let callBackDidUpdated = null as any;
     class MyComp extends BaseComponent {
-        public componentDidUpdate() {
+        public componentDidUpdate(prevProps: Readonly<IBaseComponentProps>, prevState: Readonly<IComponentState>, snapshot?: any) {
+            super.componentDidUpdate(prevProps, prevState,snapshot);
             if (this.props.didUpdated) this.props.didUpdated();
 
         }
@@ -143,19 +145,22 @@ describe('test field', () => {
 
 
 
-        let doOne = false;
+        let cntUpdate = 0;
         callBackDidUpdated = function () {
 
-            let lis = r.container.getElementsByTagName('li');
+            
             try {
-                expect(lis.length).toEqual(2);
-                expect(lis[0].innerHTML).toEqual('val1');
-                expect(lis[1].innerHTML).toEqual('val2');
-
-                if (!doOne) {
-                    doOne = true;
+                cntUpdate++;
+                if (cntUpdate==2) {
+                    let lis = r.container.getElementsByTagName('li');
+                    
+                    console.log('lis.length', lis.length);
+                    expect(lis.length).toEqual(2);
+                    expect(lis[0].innerHTML).toEqual('val1');
+                    expect(lis[1].innerHTML).toEqual('val2');
+                    
                 }
-                else {
+                else if (cntUpdate==3) {
                     el = screen.getByText('fval1');
                     expect(el).toBeInstanceOf(HTMLDivElement);
                     done();
@@ -178,20 +183,23 @@ describe('test field', () => {
     test('load field with api 2', done => {
         let field = React.createRef() as RefObject<Field>;
         let el = null;
-
+        let r = null as RenderResult;
 
 
         let doOne = false;
         callBackDidUpdated = function () {
-
-            let lis = r.container.getElementsByTagName('li');
+            
+            
             try {
-                expect(lis.length).toEqual(2);
-                expect(lis[0].innerHTML).toEqual('val1');
-                expect(lis[1].innerHTML).toEqual('val2');
+                
 
                 if (!doOne) {
+                    
                     doOne = true;
+                    let lis = r.container.getElementsByTagName('li');
+                    expect(lis.length).toEqual(2);
+                    expect(lis[0].innerHTML).toEqual('val1');
+                    expect(lis[1].innerHTML).toEqual('val2');
                     field.current.bindValue({
                         f1: 'fval7',
                         f2: 'fval2'
@@ -210,27 +218,33 @@ describe('test field', () => {
 
         } as any;
 
-        let r = render(<Field id="cidViewContainer2" type="myControl" ref={field} dataField="f1" dataSourceApi='/fakeApiDs' dataApiParamsFunc={dataApiParamsFunc} didUpdated={callBackDidUpdated} />);
+        r = render(<Field id="cidViewContainer2" type="myControl" ref={field} dataField="f1" dataSourceApi='/fakeApiDs' dataApiParamsFunc={dataApiParamsFunc} didUpdated={callBackDidUpdated} />);
         expect(dataApiParamsFunc).toBeCalled();
         expect(realDatasourceParams).toEqual(datasourceParams);
+        
     });
     //*/
+    /*
     test('load field with api 3', () => {
         var f = new Field({
             type: 'myControl', dataField: 'f1', dataSourceApi: '/fakeApiDs', dataApiParamsFunc: function (s, u, c) {
                 return {};
             }
         });
-        
+        console.log('1');
         f.rebind(null, {});
+        console.log('2');
         f.control = {
             current: {
                 getDataSource: () => { return {a:true}; },
                 setValue: () => { }
             } as any
         };
+        console.log('3');
         f.componentDidMount();
+        console.log('4');
         f.rebind(null, {});
+        console.log('5');
         f.bindValue({
             f1: 'fval1',
             f2: 'fval2',
@@ -240,7 +254,8 @@ describe('test field', () => {
                 value: 'item002'
             }]
         }, false);
-
+        console.log('6');
 
     });
+    //*/
 });

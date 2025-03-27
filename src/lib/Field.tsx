@@ -28,11 +28,11 @@ export class Field extends React.Component<IFieldProps & { [name: string]: any }
         if (url) {
 
             if (this.props.dataApiParamsFunc) {
-                if (postData == undefined) postData = this.props.dataApiParamsFunc(this.control.current, url, this.context);
+                if (postData === undefined) postData = this.props.dataApiParamsFunc(this.control.current, url, this.context);
                 else postData = window.utilities.merge(this.props.dataApiParamsFunc(this.control.current, url, this.context), postData);
             }
             execApiAsync(url, postData).then(response => response.json()).then(data => {
-                this.control.current.setDataSource(data);
+                if(this.control.current) this.control.current.setDataSource(data);
                 if (this.delayValue) {
                     this.control.current.setValue(this.delayValue.value, this.delayValue.isDefault);
                     this.delayValue = null;
@@ -52,14 +52,14 @@ export class Field extends React.Component<IFieldProps & { [name: string]: any }
         if (this.control.current == null) return false;
         let value = undefined;
         if (this.props.sourceField) value = window.utilities.extractValue(val, this.props.sourceField);
-        if (value != undefined) this.control.current.setDataSource(value);
+        if (value !== undefined) this.control.current.setDataSource(value);
         value = undefined;
 
-        if (this.props.dataField){ 
+        if (this.props.dataField) {
             value = window.utilities.extractValue(val, this.props.dataField);
-            this.control.current.setDisplayValue(window.utilities.extractValue(val, this.props.dataField+"_Display"));
+            this.control.current.setDisplayValue(window.utilities.extractValue(val, this.props.dataField + "_Display"));
         }
-        if (value != undefined) {
+        if (value !== undefined) {
             if (this.props.dataSourceApi && this.control.current.getDataSource() == null) {
                 //should not bind value now
                 this.delayValue = { value, isDefault };

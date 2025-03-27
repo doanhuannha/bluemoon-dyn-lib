@@ -42,7 +42,7 @@ export const DataStorage = {
     },
     register: function (storeName: string, comp?: React.Component | React.Dispatch<any>): boolean {
         if (!this._storages[storeName]) this._storages[storeName] = { value: null, comps: [] };
-        if (comp != null && comp != undefined) {
+        if (comp != null) {
             let comps = this._storages[storeName].comps;
             let notExist = true;
             for (let i = 0; i < comps.length; i++) {
@@ -58,7 +58,7 @@ export const DataStorage = {
     },
     unregister: function (storeName: string, comp?: React.Component | React.Dispatch<any>): boolean{
         if (!this._storages[storeName]) return false;
-        if (comp != null && comp != undefined) {
+        if (comp != null) {
             let comps = this._storages[storeName].comps;
             let i = 0
             for (i = 0; i < comps.length; i++) {
